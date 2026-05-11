@@ -4,3 +4,4 @@ jweb.db-*
 *.swp
 dist-newstyle
 upload
+.session.aes
