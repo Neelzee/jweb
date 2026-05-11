@@ -26,6 +26,7 @@ Post
   link        Text Maybe
   videoUrl    Text Maybe
   createdBy   UserId
+  deletedAt   UTCTime Maybe
   deriving Show
 
 PostImage

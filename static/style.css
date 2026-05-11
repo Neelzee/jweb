@@ -184,6 +184,7 @@ h1 {
 .status-wanted  { background: var(--wanted-bg);  color: var(--wanted-fg); }
 .status-ordered { background: var(--ordered-bg); color: var(--ordered-fg); }
 .status-bought  { background: var(--bought-bg);  color: var(--bought-fg); }
+.status-deleted { background: #f3f4f6; color: #6b7280; }
 
 .description {
   font-size: 0.9rem;
@@ -323,4 +324,9 @@ button[type="submit"]:hover {
 
 .error {
   color: var(--danger);
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
 }

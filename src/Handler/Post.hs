@@ -9,7 +9,6 @@ import Data.UUID.V4 (nextRandom)
 import Database.Persist
   ( Entity (..)
   , SelectOpt (..)
-  , delete
   , get
   , insert
   , insert_
@@ -83,10 +82,8 @@ postPostEditR pid = do
 postPostDeleteR :: PostId -> Handler Html
 postPostDeleteR pid = do
   _ <- requireLogin
-  images <- runDB $ selectList [PostImagePostId ==. pid] []
-  runDB $ do
-    mapM_ (delete . entityKey) images
-    delete pid
+  now <- liftIO getCurrentTime
+  runDB $ update pid [PostDeletedAt =. Just now]
   addHeader "HX-Redirect" "/"
   sendResponseStatus ok200 ("" :: Text)
 
@@ -157,6 +154,7 @@ readPostForm = do
     , postLink        = mLink
     , postVideoUrl    = mVideo
     , postCreatedBy   = uid
+    , postDeletedAt   = Nothing
     }
 
 handleImageUploads :: PostId -> Handler ()

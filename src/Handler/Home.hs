@@ -14,8 +14,8 @@ getHomeR = do
   mStatusParam <- lookupGetParam "status"
   let mStatus = mStatusParam >>= parseStatus
   posts <- runDB $ case mStatus of
-    Nothing -> selectList [] [Desc PostCreatedAt]
-    Just s  -> selectList [PostStatus ==. s] [Desc PostCreatedAt]
+    Nothing -> selectList [PostDeletedAt ==. Nothing] [Desc PostCreatedAt]
+    Just s  -> selectList [PostStatus ==. s, PostDeletedAt ==. Nothing] [Desc PostCreatedAt]
   let pids = map entityKey posts
   images <- runDB $ selectList [PostImagePostId <-. pids] [Asc PostImageSortOrder]
   let imageMap = groupByPost images
