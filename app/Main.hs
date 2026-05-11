@@ -19,22 +19,23 @@ import Yesod.Core (toWaiApp)
 
 main :: IO ()
 main = do
-  uploadDir      <- fromMaybe "/var/lib/jweb/uploads"     <$> lookupEnv "JWEB_UPLOAD_DIR"
-  dbPath         <- fromMaybe "/var/lib/jweb/jweb.db"     <$> lookupEnv "JWEB_DB_PATH"
-  sessionKeyPath <- fromMaybe "/var/lib/jweb/session.aes" <$> lookupEnv "JWEB_SESSION_KEY"
-  staticDir      <- fromMaybe "./static"                  <$> lookupEnv "JWEB_STATIC_DIR"
-  port           <- maybe 3000 read                       <$> lookupEnv "JWEB_PORT"
+  uploadDir       <- fromMaybe "/var/lib/jweb/uploads"     <$> lookupEnv "JWEB_UPLOAD_DIR"
+  dbPath          <- fromMaybe "/var/lib/jweb/jweb.db"     <$> lookupEnv "JWEB_DB_PATH"
+  sessionKeyPath  <- fromMaybe "/var/lib/jweb/session.aes" <$> lookupEnv "JWEB_SESSION_KEY"
+  staticDir       <- fromMaybe "./static"                  <$> lookupEnv "JWEB_STATIC_DIR"
+  port            <- maybe 3000  read <$> lookupEnv "JWEB_PORT"
+  cleanupInterval <- maybe 86400 read <$> lookupEnv "JWEB_CLEANUP_INTERVAL_SECS"
   pool <- runStderrLoggingT $ createSqlitePool (pack dbPath) 5
   runSqlPool (runMigration migrateAll) pool
   waiApp <- toWaiApp (App pool uploadDir sessionKeyPath staticDir)
-  startCleanupThread pool
+  startCleanupThread pool cleanupInterval
   run port waiApp
 
-startCleanupThread :: ConnectionPool -> IO ()
-startCleanupThread pool = void $ forkIO $ do
+startCleanupThread :: ConnectionPool -> Int -> IO ()
+startCleanupThread pool intervalSecs = void $ forkIO $ do
   cleanup pool
   forever $ do
-    threadDelay (24 * 60 * 60 * 1_000_000)
+    threadDelay (intervalSecs * 1_000_000)
     cleanup pool
 
 cleanup :: ConnectionPool -> IO ()
