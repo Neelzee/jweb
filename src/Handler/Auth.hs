@@ -56,8 +56,8 @@ handleEmailStep email = do
             <input type="hidden" name="step" value="login">
             <p>Velkommen, #{userName user}
             <label>Passord
-            <input type="password" name="password" placeholder="Password" required autofocus>
-            <button type="submit">Log in
+            <input type="password" name="password" placeholder="Passord" required autofocus>
+            <button type="submit">Logg inn
       |]
     _ ->
       sendFragment

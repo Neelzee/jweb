@@ -118,9 +118,9 @@ postForm mPost =
 
 statusOptions :: [(Text, Text)]
 statusOptions =
-  [ ("wanted", "Wanted"),
-    ("ordered", "Ordered"),
-    ("bought", "Bought")
+  [ ("wanted", "Ønsket"),
+    ("ordered", "Besilt"),
+    ("bought", "Kjøpt")
   ]
 
 statusVal :: PostStatus -> Text

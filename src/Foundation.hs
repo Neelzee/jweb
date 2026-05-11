@@ -66,7 +66,7 @@ instance Yesod App where
               <form method="post" action=@{AuthLogoutR}>
                 $maybe token <- mToken
                   <input type="hidden" name="_token" value="#{token}">
-                <button type="submit">Logg ut
+                <button class="log-out" type="submit">Logg ut
           <main>
             ^{pageBody pc}
     |]
