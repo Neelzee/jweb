@@ -4,7 +4,6 @@ import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Maybe (isJust)
 import Data.Text (Text)
-import Database.Persist (Entity (..), SelectOpt (..), selectList, (==.), (<-.))
 import Foundation
 import Model
 import Yesod
@@ -15,7 +14,7 @@ getHomeR = do
   let mStatus = mStatusParam >>= parseStatus
   posts <- runDB $ case mStatus of
     Nothing -> selectList [PostDeletedAt ==. Nothing] [Desc PostCreatedAt]
-    Just s  -> selectList [PostStatus ==. s, PostDeletedAt ==. Nothing] [Desc PostCreatedAt]
+    Just s -> selectList [PostStatus ==. s, PostDeletedAt ==. Nothing] [Desc PostCreatedAt]
   let pids = map entityKey posts
   images <- runDB $ selectList [PostImagePostId <-. pids] [Asc PostImageSortOrder]
   let imageMap = groupByPost images
@@ -63,17 +62,17 @@ groupByPost = foldr step Map.empty
     step (Entity _ img) = Map.insertWith (++) (postImagePostId img) [img]
 
 statusVal :: PostStatus -> Text
-statusVal Wanted  = "wanted"
+statusVal Wanted = "wanted"
 statusVal Ordered = "ordered"
-statusVal Bought  = "bought"
+statusVal Bought = "bought"
 
 parseStatus :: Text -> Maybe PostStatus
-parseStatus "wanted"  = Just Wanted
+parseStatus "wanted" = Just Wanted
 parseStatus "ordered" = Just Ordered
-parseStatus "bought"  = Just Bought
-parseStatus _         = Nothing
+parseStatus "bought" = Just Bought
+parseStatus _ = Nothing
 
 statusLabel :: PostStatus -> Text
-statusLabel Wanted  = "Ønsket"
+statusLabel Wanted = "Ønsket"
 statusLabel Ordered = "Bestilt"
-statusLabel Bought  = "Kjøpt"
+statusLabel Bought = "Kjøpt"

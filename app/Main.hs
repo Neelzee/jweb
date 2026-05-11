@@ -12,7 +12,7 @@ import Database.Persist (Entity (..), delete, deleteWhere, selectList, (!=.), (<
 import Database.Persist.Sqlite (ConnectionPool, createSqlitePool, runMigration, runSqlPool)
 import Application ()
 import Foundation (App (..))
-import Model (EntityField (PostDeletedAt, PostImagePostId), Post (..), PostId, migrateAll)
+import Model (EntityField (PostDeletedAt, PostImagePostId), Post (..), migrateAll)
 import Network.Wai.Handler.Warp (run)
 import System.Environment (lookupEnv)
 import Yesod.Core (toWaiApp)

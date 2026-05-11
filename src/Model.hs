@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeOperators #-}
+
 module Model where
 
 import Data.Text (Text)
@@ -10,7 +12,9 @@ data PostStatus = Wanted | Ordered | Bought
 
 derivePersistField "PostStatus"
 
-share [mkPersist sqlSettings, mkMigrate "migrateAll"] [persistLowerCase|
+share
+  [mkPersist sqlSettings, mkMigrate "migrateAll"]
+  [persistLowerCase|
 User
   email        Text
   name         Text

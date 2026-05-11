@@ -13,8 +13,8 @@ getStaticR filename = do
   when (T.any (== '/') filename || T.isInfixOf ".." filename) notFound
   app <- getYesod
   let path = appStaticDir app </> T.unpack filename
-  exists <- liftIO $ doesFileExist path
-  unless exists notFound
+  exists' <- liftIO $ doesFileExist path
+  unless exists' notFound
   sendFile (mimeFor path) path
 
 mimeFor :: FilePath -> ContentType

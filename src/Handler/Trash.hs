@@ -3,7 +3,6 @@ module Handler.Trash where
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Foundation
-import Database.Persist (Entity (..), SelectOpt (..), selectList, update, (!=.), (==.), (<-.))
 import Model
 import Yesod
 

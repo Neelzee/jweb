@@ -1,21 +1,20 @@
 module Handler.Post where
 
+import Control.Monad (unless, when)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Control.Monad (unless, when)
 import Data.Time (UTCTime, getCurrentTime)
 import Data.UUID (toString)
 import Data.UUID.V4 (nextRandom)
 import Database.Persist
-  ( Entity (..)
-  , SelectOpt (..)
-  , get
-  , insert
-  , insert_
-  , selectList
-  , update
-  , (=.)
-  , (==.)
+  ( SelectOpt (..),
+    get,
+    insert,
+    insert_,
+    selectList,
+    update,
+    (=.),
+    (==.),
   )
 import Foundation
 import Model
@@ -23,8 +22,6 @@ import Network.HTTP.Types (ok200)
 import System.Directory (createDirectoryIfMissing, doesFileExist)
 import System.FilePath (takeExtension, (</>))
 import Yesod
-
--- New post
 
 getPostNewR :: Handler Html
 getPostNewR = do
@@ -38,19 +35,17 @@ getPostNewR = do
 
 postPostNewR :: Handler Html
 postPostNewR = do
-  uid  <- requireLogin
-  now  <- liftIO getCurrentTime
+  uid <- requireLogin
+  now <- liftIO getCurrentTime
   post <- readPostForm
-  pid  <- runDB $ insert (post now uid)
+  pid <- runDB $ Database.Persist.insert (post now uid)
   handleImageUploads pid
   redirect HomeR
-
--- Edit post
 
 getPostEditR :: PostId -> Handler Html
 getPostEditR pid = do
   _ <- requireLogin
-  post <- runDB (get pid) >>= maybe notFound pure
+  post <- runDB (Database.Persist.get pid) >>= maybe notFound pure
   defaultLayout $ do
     setTitle "Edit Post"
     [whamlet|
@@ -63,45 +58,44 @@ getPostEditR pid = do
 
 postPostEditR :: PostId -> Handler Html
 postPostEditR pid = do
-  uid    <- requireLogin
-  now    <- liftIO getCurrentTime
+  uid <- requireLogin
+  now <- liftIO getCurrentTime
   mkPost <- readPostForm
   let p = mkPost now uid
-  runDB $ update pid
-    [ PostStatus      =. postStatus p
-    , PostName        =. postName p
-    , PostDescription =. postDescription p
-    , PostLink        =. postLink p
-    , PostVideoUrl    =. postVideoUrl p
-    ]
+  runDB $
+    Database.Persist.update
+      pid
+      [ PostStatus Database.Persist.=. postStatus p,
+        PostName Database.Persist.=. postName p,
+        PostDescription Database.Persist.=. postDescription p,
+        PostLink Database.Persist.=. postLink p,
+        PostVideoUrl Database.Persist.=. postVideoUrl p
+      ]
   handleImageUploads pid
   redirect HomeR
-
--- Delete post
 
 postPostDeleteR :: PostId -> Handler Html
 postPostDeleteR pid = do
   _ <- requireLogin
   now <- liftIO getCurrentTime
-  runDB $ update pid [PostDeletedAt =. Just now]
+  runDB $ Database.Persist.update pid [PostDeletedAt Database.Persist.=. Just now]
   addHeader "HX-Redirect" "/"
   sendResponseStatus ok200 ("" :: Text)
-
--- Serve uploads
 
 getUploadsR :: Text -> Handler TypedContent
 getUploadsR filename = do
   when (T.any (== '/') filename || T.isInfixOf ".." filename) notFound
-  app  <- getYesod
+  app <- getYesod
   let path = appUploadDir app </> T.unpack filename
-  exists <- liftIO $ doesFileExist path
-  unless exists notFound
+  exists' <- liftIO $ doesFileExist path
+  unless exists' notFound
   sendFile (mimeFor path) path
 
 -- Helpers
 
 postForm :: Maybe Post -> Widget
-postForm mPost = [whamlet|
+postForm mPost =
+  [whamlet|
   <form method="post" enctype="multipart/form-data">
     <label>Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required>
@@ -124,56 +118,61 @@ postForm mPost = [whamlet|
 
 statusOptions :: [(Text, Text)]
 statusOptions =
-  [ ("wanted",  "Wanted")
-  , ("ordered", "Ordered")
-  , ("bought",  "Bought")
+  [ ("wanted", "Wanted"),
+    ("ordered", "Ordered"),
+    ("bought", "Bought")
   ]
 
 statusVal :: PostStatus -> Text
-statusVal Wanted  = "wanted"
+statusVal Wanted = "wanted"
 statusVal Ordered = "ordered"
-statusVal Bought  = "bought"
+statusVal Bought = "bought"
 
 parseStatusField :: Text -> PostStatus
 parseStatusField "ordered" = Ordered
-parseStatusField "bought"  = Bought
-parseStatusField _         = Wanted
+parseStatusField "bought" = Bought
+parseStatusField _ = Wanted
 
 readPostForm :: Handler (UTCTime -> UserId -> Post)
 readPostForm = do
-  name        <- runInputPost $ ireq textField "name"
+  name <- runInputPost $ ireq textField "name"
   description <- maybe "" id <$> runInputPost (iopt textField "description")
-  statusText  <- runInputPost $ ireq textField "status"
-  mLink       <- runInputPost $ iopt urlField "link"
-  mVideo      <- runInputPost $ iopt urlField "videoUrl"
-  pure $ \now uid -> Post
-    { postCreatedAt   = now
-    , postStatus      = parseStatusField statusText
-    , postName        = name
-    , postDescription = description
-    , postLink        = mLink
-    , postVideoUrl    = mVideo
-    , postCreatedBy   = uid
-    , postDeletedAt   = Nothing
-    }
+  statusText <- runInputPost $ ireq textField "status"
+  mLink <- runInputPost $ iopt urlField "link"
+  mVideo <- runInputPost $ iopt urlField "videoUrl"
+  pure $ \now uid ->
+    Post
+      { postCreatedAt = now,
+        postStatus = parseStatusField statusText,
+        postName = name,
+        postDescription = description,
+        postLink = mLink,
+        postVideoUrl = mVideo,
+        postCreatedBy = uid,
+        postDeletedAt = Nothing
+      }
 
 handleImageUploads :: PostId -> Handler ()
 handleImageUploads pid = do
-  files     <- lookupFiles "images"
+  files <- lookupFiles "images"
   uploadDir <- appUploadDir <$> getYesod
   liftIO $ createDirectoryIfMissing True uploadDir
-  existing  <- runDB $ selectList [PostImagePostId ==. pid] [Asc PostImageSortOrder]
+  existing <-
+    runDB $
+      Database.Persist.selectList
+        [PostImagePostId Database.Persist.==. pid]
+        [Database.Persist.Asc PostImageSortOrder]
   let nextOrder = length existing
-  mapM_ (saveImage pid uploadDir nextOrder) (zip [0..] files)
+  mapM_ (saveImage pid uploadDir nextOrder) (zip [0 ..] files)
 
 saveImage :: PostId -> FilePath -> Int -> (Int, FileInfo) -> Handler ()
 saveImage pid dir baseOrder (i, fi) = do
   uuid <- liftIO nextRandom
-  let ext  = takeExtension (T.unpack (fileName fi))
+  let ext = takeExtension (T.unpack (fileName fi))
       name = T.pack (toString uuid) <> T.pack ext
       dest = dir </> T.unpack name
   liftIO $ fileMove fi dest
-  runDB $ insert_ (PostImage pid name (baseOrder + i))
+  runDB $ Database.Persist.insert_ (PostImage pid name (baseOrder + i))
 
 mimeFor :: FilePath -> ContentType
 mimeFor path = case takeExtension path of

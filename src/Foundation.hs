@@ -7,13 +7,15 @@ import Model
 import Yesod
 
 data App = App
-  { appConnectionPool :: ConnectionPool
-  , appUploadDir      :: FilePath
-  , appSessionKeyPath :: FilePath
-  , appStaticDir      :: FilePath
+  { appConnectionPool :: ConnectionPool,
+    appUploadDir :: FilePath,
+    appSessionKeyPath :: FilePath,
+    appStaticDir :: FilePath
   }
 
-mkYesodData "App" [parseRoutes|
+mkYesodData
+  "App"
+  [parseRoutes|
 /                     HomeR        GET
 /auth/login           AuthLoginR   GET POST
 /auth/logout          AuthLogoutR  POST
@@ -27,16 +29,18 @@ mkYesodData "App" [parseRoutes|
 |]
 
 instance Yesod App where
-  makeSessionBackend app = Just <$>
-    defaultClientSessionBackend (30 * 24 * 60) (appSessionKeyPath app)
+  makeSessionBackend app =
+    Just
+      <$> defaultClientSessionBackend (30 * 24 * 60) (appSessionKeyPath app)
 
   defaultLayout widget = do
-    pc      <- widgetToPageContent widget
-    req     <- getRequest
+    pc <- widgetToPageContent widget
+    req <- getRequest
     mUserId <- lookupSession "userId"
     let loggedIn = isJust mUserId
-        mToken   = reqToken req
-    withUrlRenderer [hamlet|
+        mToken = reqToken req
+    withUrlRenderer
+      [hamlet|
       $doctype 5
       <html lang="en">
         <head>
@@ -83,9 +87,9 @@ requireLogin :: Handler UserId
 requireLogin = do
   mText <- lookupSession "userId"
   case mText >>= fromPathPiece of
-    Nothing  -> redirect AuthLoginR
+    Nothing -> redirect AuthLoginR
     Just uid -> do
       mUser <- runDB $ get uid
       case mUser of
-        Just _  -> pure uid
+        Just _ -> pure uid
         Nothing -> deleteSession "userId" >> redirect AuthLoginR
