@@ -84,5 +84,9 @@ requireLogin :: Handler UserId
 requireLogin = do
   mText <- lookupSession "userId"
   case mText >>= fromPathPiece of
-    Just uid -> pure uid
     Nothing  -> redirect AuthLoginR
+    Just uid -> do
+      mUser <- runDB $ get uid
+      case mUser of
+        Just _  -> pure uid
+        Nothing -> deleteSession "userId" >> redirect AuthLoginR
