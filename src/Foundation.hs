@@ -59,7 +59,6 @@ instance Yesod App where
           <header>
             <a href=@{HomeR}>Ønskeliste</a>
             $if loggedIn
-              <a href=@{TrashR}>Papirkurv
               <form method="post" action=@{AuthLogoutR}>
                 $maybe token <- mToken
                   <input type="hidden" name="_token" value="#{token}">

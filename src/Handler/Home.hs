@@ -29,6 +29,8 @@ getHomeR = do
         <a href=@?{(HomeR, [("status", "wanted")])}>Ønsket
         <a href=@?{(HomeR, [("status", "ordered")])}>Bestilt
         <a href=@?{(HomeR, [("status", "bought")])}>Kjøpt
+        $if loggedIn
+          <a href=@{TrashR} .filter-trash>Papirkurv
       $if loggedIn
         <a href=@{PostNewR} .btn-new>+ Nytt ønske
       <ul #posts>
