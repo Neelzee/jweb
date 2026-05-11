@@ -142,7 +142,7 @@ parseStatusField _         = Wanted
 readPostForm :: Handler (UTCTime -> UserId -> Post)
 readPostForm = do
   name        <- runInputPost $ ireq textField "name"
-  description <- runInputPost $ ireq textField "description"
+  description <- maybe "" id <$> runInputPost (iopt textField "description")
   statusText  <- runInputPost $ ireq textField "status"
   mLink       <- runInputPost $ iopt urlField "link"
   mVideo      <- runInputPost $ iopt urlField "videoUrl"
