@@ -10,6 +10,7 @@ data App = App
   { appConnectionPool :: ConnectionPool
   , appUploadDir      :: FilePath
   , appSessionKeyPath :: FilePath
+  , appStaticDir      :: FilePath
   }
 
 mkYesodData "App" [parseRoutes|
@@ -20,6 +21,7 @@ mkYesodData "App" [parseRoutes|
 /post/#PostId/edit    PostEditR    GET POST
 /post/#PostId/delete  PostDeleteR  POST
 /uploads/#Text        UploadsR     GET
+/static/#Text         StaticR      GET
 |]
 
 instance Yesod App where
@@ -41,6 +43,7 @@ instance Yesod App where
           $maybe token <- mToken
             <meta name="csrf-token" content="#{token}">
           <title>#{pageTitle pc}
+          <link rel="stylesheet" href=@{StaticR "style.css"}>
           <script src="https://unpkg.com/htmx.org@2.0.4" defer>
           <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -52,12 +55,12 @@ instance Yesod App where
           ^{pageHead pc}
         <body>
           <header>
-            <a href=@{HomeR}>Kitchen Wishlist</a>
+            <a href=@{HomeR}>Ønskeliste</a>
             $if loggedIn
               <form method="post" action=@{AuthLogoutR}>
                 $maybe token <- mToken
                   <input type="hidden" name="_token" value="#{token}">
-                <button type="submit">Log out
+                <button type="submit">Logg ut
           <main>
             ^{pageBody pc}
     |]

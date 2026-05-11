@@ -25,7 +25,7 @@ getAuthLoginR = do
           <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
             <label>Email
             <input type="email" name="email" placeholder="your@email.com" required autofocus>
-            <button type="submit">Continue
+            <button type="submit">Fortsett
       |]
 
 postAuthLoginR :: Handler Html
@@ -53,8 +53,8 @@ handleEmailStep email = do
           <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
             <input type="hidden" name="email" value="#{email}">
             <input type="hidden" name="step" value="login">
-            <p>Welcome back, #{userName user}
-            <label>Password
+            <p>Velkommen, #{userName user}
+            <label>Passord
             <input type="password" name="password" placeholder="Password" required autofocus>
             <button type="submit">Log in
       |]
@@ -64,12 +64,12 @@ handleEmailStep email = do
           <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
             <input type="hidden" name="email" value="#{email}">
             <input type="hidden" name="step" value="setup">
-            <p>Set a password for #{email}
-            <label>Password
+            <p>Sett eit passord for #{email}
+            <label>Passord
             <input type="password" name="password" placeholder="Password" required autofocus>
-            <label>Confirm
+            <label>Bekreft
             <input type="password" name="confirm" placeholder="Confirm password" required>
-            <button type="submit">Set password
+            <button type="submit">Sett passord
       |]
 
 handlePasswordStep :: Text -> Handler Html
@@ -93,10 +93,10 @@ handlePasswordStep email = do
                 <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
                   <input type="hidden" name="email" value="#{email}">
                   <input type="hidden" name="step" value="login">
-                  <p .error>Wrong password.
-                  <label>Password
+                  <p .error>Feil passord.
+                  <label>Passord
                   <input type="password" name="password" required autofocus>
-                  <button type="submit">Log in
+                  <button type="submit">Logg inn
             |]
 
 handleSetupStep :: Text -> Handler Html
@@ -110,12 +110,12 @@ handleSetupStep email = do
         <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
           <input type="hidden" name="email" value="#{email}">
           <input type="hidden" name="step" value="setup">
-          <p .error>Passwords do not match.
-          <label>Password
+          <p .error>Passorda er ikkje like.
+          <label>Passord
           <input type="password" name="password" required autofocus>
-          <label>Confirm
+          <label>Bekreft
           <input type="password" name="confirm" required>
-          <button type="submit">Set password
+          <button type="submit">Sett passord
     |]
   mHash <- liftIO $ hashPwd password
   hash  <- maybe errInternal pure mHash

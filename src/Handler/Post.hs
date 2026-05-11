@@ -59,7 +59,7 @@ getPostEditR pid = do
       ^{postForm (Just post)}
       <button
         hx-post=@{PostDeleteR pid}
-        hx-confirm="Delete this post?">Delete post
+        hx-confirm="Delete this post?">Slett ønske
     |]
 
 postPostEditR :: PostId -> Handler Html
@@ -106,21 +106,21 @@ getUploadsR filename = do
 postForm :: Maybe Post -> Widget
 postForm mPost = [whamlet|
   <form method="post" enctype="multipart/form-data">
-    <label>Name
+    <label>Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required>
-    <label>Description
+    <label>Beskrivelse
     <textarea name="description">#{maybe "" postDescription mPost}
     <label>Status
     <select name="status">
       $forall (val, lbl) <- statusOptions
         <option value="#{val}" :currentStatus == val:selected>#{lbl}
-    <label>Product link
+    <label>Produkt link
     <input type="url" name="link" value="#{maybe "" (maybe "" id . postLink) mPost}">
     <label>Video URL
     <input type="url" name="videoUrl" value="#{maybe "" (maybe "" id . postVideoUrl) mPost}">
-    <label>Images
+    <label>Bilder
     <input type="file" name="images" accept="image/*" multiple>
-    <button type="submit">Save
+    <button type="submit">Lagre
 |]
   where
     currentStatus = maybe "wanted" (statusVal . postStatus) mPost
