@@ -1,0 +1,73 @@
+cabal-version:      2.4
+name:               jweb
+version:            0.1.0.0
+build-type:         Simple
+
+common shared
+  default-language:    Haskell2010
+  ghc-options:         -Wall
+  default-extensions:
+    DataKinds
+    DerivingStrategies
+    EmptyDataDecls
+    FlexibleContexts
+    FlexibleInstances
+    GADTs
+    GeneralizedNewtypeDeriving
+    MultiParamTypeClasses
+    OverloadedStrings
+    QuasiQuotes
+    ScopedTypeVariables
+    StandaloneDeriving
+    TemplateHaskell
+    TupleSections
+    TypeFamilies
+    UndecidableInstances
+    ViewPatterns
+
+library
+  import:          shared
+  hs-source-dirs:  src
+  exposed-modules:
+      Foundation
+    , Application
+    , Model
+    , Whitelist
+    , Handler.Home
+    , Handler.Auth
+    , Handler.Post
+  build-depends:
+      base              >= 4.13 && < 5
+    , yesod             >= 1.6
+    , yesod-core        >= 1.6
+    , yesod-persistent  >= 1.6
+    , yesod-form        >= 1.7
+    , persistent        >= 2.13
+    , persistent-sqlite >= 2.13
+    , persistent-template
+    , shakespeare       >= 2.0
+    , bcrypt
+    , bytestring
+    , containers
+    , directory
+    , filepath
+    , http-types
+    , monad-logger
+    , text
+    , time
+    , transformers
+    , uuid
+    , wai
+
+executable jweb
+  import:          shared
+  main-is:         Main.hs
+  hs-source-dirs:  app
+  build-depends:
+      base
+    , jweb
+    , monad-logger
+    , persistent-sqlite
+    , text
+    , warp
+    , yesod-core
