@@ -5,3 +5,4 @@ jweb.db-*
 dist-newstyle
 upload
 .session.aes
+result
