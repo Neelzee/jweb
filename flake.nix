@@ -37,14 +37,16 @@
             # aeson.source = "1.5.0.0";      # Override aeson to a custom version from Hackage
             # shower.source = inputs.shower; # Override shower to a custom source path
           };
+
           settings = {
-            #  aeson = {
-            #    check = false;
-            #  };
-            #  relude = {
-            #    haddock = false;
-            #    broken = false;
-            #  };
+            jweb = {
+              custom = drv: drv.overrideAttrs (old: {
+                postInstall = (old.postInstall or "") + ''
+                  mkdir -p $out/share/jweb
+                  cp -r ${./static} $out/share/jweb/static
+                '';
+              });
+            };
           };
 
           devShell = {
