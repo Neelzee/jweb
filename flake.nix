@@ -79,6 +79,25 @@
 
         # haskell-flake doesn't set the default package, but you can do it here.
         packages.default = self'.packages.jweb;
+
+        packages.docker = pkgs.dockerTools.buildLayeredImage {
+          name = "jweb";
+          tag = "latest";
+
+          contents = [
+            self'.packages.jweb
+            pkgs.cacert
+          ];
+
+          config = {
+            Cmd = [ "${self'.packages.jweb}/bin/jweb" ];
+            ExposedPorts."3000/tcp" = {};
+            WorkingDir = "/data";
+            Env = [
+              "JWEB_STATIC_DIR=${self'.packages.jweb}/share/jweb/static"
+            ];
+          };
+        };
       };
     };
 }
