@@ -5,7 +5,7 @@ import Data.Text (Text)
 entries :: [(Text, Text)]
 entries =
   [ ("nilsien2001@gmail.com", "Nils Michael")
-  , ("jnnesh@gmail.com", "Janne")
+  , ("jnnesj@gmail.com", "Janne")
   ]
 
 member :: Text -> Bool
