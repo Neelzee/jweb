@@ -26,8 +26,12 @@ mkYesodData
 /static/#Text         StaticR      GET
 /trash                TrashR       GET
 /post/#PostId/restore PostRestoreR POST
-/tag/new             TagNewR     GET
-/tag                 TagCreateR  POST
+/tag/new               TagNewR     GET
+/tag                   TagCreateR  POST
+/tags                  TagListR    GET
+/tag/#PostTagId/edit   TagEditR    GET POST
+/tag/#PostTagId/delete TagDeleteR  POST
+/tag/#PostTagId/row    TagRowR     GET
 |]
 
 instance Yesod App where

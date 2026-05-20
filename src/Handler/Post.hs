@@ -111,10 +111,11 @@ postForm mPost allTags selectedIds =
     <label>Kategori
     <select id="tags-select" name="tags" multiple>
       $forall (tagKey, tagName, isSelected) <- tagData
-        <option value="#{tagKey}" :isSelected:selected>#{tagName}
+        <option value="#{tagKey}" id="tag-option-#{tagKey}" class="tag-option" :isSelected:selected>#{tagName}
     <div id="tag-creator">
       <button type="button" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
         + Ny kategori
+    <a href=@{TagListR}>Rediger kategorier
     <label>Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required>
     <label>Beskrivelse
