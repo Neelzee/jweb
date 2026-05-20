@@ -24,7 +24,7 @@ getHomeR = do
     setTitle "Ønskeliste"
     [whamlet|
       <nav .filters>
-        <a href=@{HomeR}>All
+        <a href=@{HomeR}>Alle
         <a href=@?{(HomeR, [("status", "wanted")])}>Ønsket
         <a href=@?{(HomeR, [("status", "ordered")])}>Bestilt
         <a href=@?{(HomeR, [("status", "bought")])}>Kjøpt
