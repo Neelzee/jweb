@@ -110,9 +110,11 @@ postForm mPost allTags selectedIds =
   <form class="flex flex-col gap-4 max-w-lg" method="post" enctype="multipart/form-data">
     <div id="tags-area" class="flex flex-col gap-2">
       <label class="block text-sm font-semibold mb-1.5">Kategori
-      <select id="tags-select" name="tags" multiple class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+      <div id="tags-select" class="flex flex-col gap-1">
         $forall (tagKey, tagName, isSelected) <- tagData
-          <option value="#{tagKey}" id="tag-option-#{tagKey}" class="tag-option" :isSelected:selected>#{tagName}
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" name="tags" value="#{tagKey}" :isSelected:checked>
+            #{tagName}
       <div id="tag-creator" class="flex items-center gap-2">
         <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
           + Ny kategori

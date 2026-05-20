@@ -28,20 +28,23 @@ postTagCreateR = do
   _ <- requireLogin
   tagName <- runInputPost $ ireq textField "tag"
   let trimmed = T.strip tagName
-  mTid <- runDB $ do
-    mNew <- insertUnique (PostTag trimmed)
-    case mNew of
-      Just tid -> pure (Just tid)
-      Nothing  -> fmap entityKey <$> getBy (UniqueTag trimmed)
-  case mTid of
-    Nothing  -> invalidArgs ["Tag kunne ikke opprettes"]
+  mNew <- runDB $ insertUnique (PostTag trimmed)
+  case mNew of
+    Nothing ->
+      renderFragment
+        [hamlet|
+          <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
+            + Ny kategori
+        |]
     Just tid ->
       renderFragment
         [hamlet|
           <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
             + Ny kategori
-          <select hx-swap-oob="beforeend:#tags-select" style="display:none">
-            <option value="#{fromSqlKey tid}" selected>#{trimmed}
+          <div hx-swap-oob="beforeend:#tags-select">
+            <label class="flex items-center gap-2 text-sm cursor-pointer">
+              <input type="checkbox" name="tags" value="#{fromSqlKey tid}" checked>
+              #{trimmed}
         |]
 
 -- Inline tag management fragment (loaded into #tags-area from the post form)
@@ -83,9 +86,11 @@ getTagSelectR = do
   renderFragment
     [hamlet|
       <label class="block text-sm font-semibold mb-1.5">Kategori
-      <select id="tags-select" name="tags" multiple class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+      <div id="tags-select" class="flex flex-col gap-1">
         $forall Entity tid tag <- allTags
-          <option value="#{fromSqlKey tid}">#{postTagTag tag}
+          <label class="flex items-center gap-2 text-sm cursor-pointer">
+            <input type="checkbox" name="tags" value="#{fromSqlKey tid}">
+            #{postTagTag tag}
       <div id="tag-creator" class="flex items-center gap-2">
         <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
           + Ny kategori
