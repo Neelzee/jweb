@@ -11,8 +11,6 @@ import Model
 import Network.HTTP.Types (ok200)
 import Yesod
 
--- Inline new-tag form (loaded into #tag-creator on the post form)
-
 getTagNewR :: Handler Html
 getTagNewR = do
   _ <- requireLogin
@@ -47,8 +45,6 @@ postTagCreateR = do
               #{trimmed}
         |]
 
--- Inline tag management fragment (loaded into #tags-area from the post form)
-
 getTagInlineR :: Handler Html
 getTagInlineR = do
   _ <- requireLogin
@@ -71,7 +67,7 @@ getTagInlineR = do
               hx-post=@{TagDeleteR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
-              hx-confirm="Slette «#{postTagTag tag}»? Dette fjerner taggen fra alle innlegg.">
+              hx-confirm="Slette «#{postTagTag tag}»? Dette fjernar taggen frå alle innlegg.">
               Slett
       <div id="tag-creator" class="flex items-center gap-2 mt-2">
         <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
@@ -79,8 +75,6 @@ getTagInlineR = do
       <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagSelectR} hx-target="#tags-area" hx-swap="innerHTML">
         Tilbake
     |]
-
--- Restores the tag selector (used by the Tilbake button in the inline manager)
 
 getTagSelectR :: Handler Html
 getTagSelectR = do
@@ -97,8 +91,6 @@ getTagSelectR = do
       <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
         Rediger kategorier
     |]
-
--- Tag management page
 
 getTagListR :: Handler Html
 getTagListR = do
@@ -124,7 +116,7 @@ getTagListR = do
               hx-post=@{TagDeleteR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
-              hx-confirm="Slette «#{postTagTag tag}»? Dette fjerner taggen fra alle innlegg.">
+              hx-confirm="Sletta «#{postTagTag tag}»? Dette fjernar taggen frå alle innlegg.">
               Slett
     |]
 
@@ -162,8 +154,6 @@ postTagEditR tid = do
       count <- runDB $ length <$> selectList [PostTagLinkTagId ==. tid] []
       renderTagRow tid trimmed count
 
--- Restores a single row (used by the cancel button)
-
 getTagRowR :: PostTagId -> Handler Html
 getTagRowR tid = do
   _ <- requireLogin
@@ -178,8 +168,6 @@ postTagDeleteR tid = do
     deleteWhere [PostTagLinkTagId ==. tid]
     delete tid
   sendResponseStatus ok200 ("" :: Text)
-
--- Shared row fragment
 
 renderTagRow :: PostTagId -> Text -> Int -> Handler Html
 renderTagRow tid name count =
@@ -196,6 +184,6 @@ renderTagRow tid name count =
           hx-post=@{TagDeleteR tid}
           hx-target="#tag-#{fromSqlKey tid}"
           hx-swap="delete"
-          hx-confirm="Slette «#{name}»? Dette fjerner taggen fra alle innlegg.">
+          hx-confirm="Sletta «#{name}»? Dette fjernar taggen frå alle innlegg.">
           Slett
     |]

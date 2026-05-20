@@ -58,7 +58,7 @@ getPostEditR pid = do
   defaultLayout $ do
     setTitle "Rediger ønske"
     [whamlet|
-      <h1 class="text-xl font-bold tracking-tight mb-6">Edit post
+      <h1 class="text-xl font-bold tracking-tight mb-6">Rediger ønske
       ^{postForm (Just post) allTags selectedIds}
       <button class="mt-2 px-3 py-1.5 rounded-lg text-sm font-medium font-[inherit] border-0 cursor-pointer transition"
         hx-post=@{PostDeleteR pid}
