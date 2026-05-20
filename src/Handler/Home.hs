@@ -18,6 +18,10 @@ getHomeR = do
   let pids = map entityKey posts
   images <- runDB $ selectList [PostImagePostId <-. pids] [Asc PostImageSortOrder]
   let imageMap = groupByPost images
+  tagLinks <- runDB $ selectList [PostTagLinkPostId <-. pids] []
+  let tagLinkVals = map entityVal tagLinks
+  tagEntities <- runDB $ selectList [PostTagId <-. map postTagLinkTagId tagLinkVals] []
+  let tagMap = buildTagMap tagLinkVals tagEntities
   mUserId <- lookupSession "userId"
   let loggedIn = isJust mUserId
   defaultLayout $ do
@@ -38,6 +42,11 @@ getHomeR = do
             <div class="flex items-center gap-2 mb-2">
               <strong>#{postName post}
               <span class="status-#{statusVal (postStatus post)} text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border">#{statusLabel (postStatus post)}
+              $with postTags <- Map.findWithDefault [] pid tagMap
+                $if not (null postTags)
+                  <div class="ml-auto flex flex-wrap gap-1">
+                    $forall tagName <- postTags
+                      <span class="text-xs px-2 py-0.5 rounded-full border">#{tagName}
             $with imgs <- Map.findWithDefault [] pid imageMap
               $if not (null imgs)
                 <div class="flex flex-wrap gap-2 mb-4">
@@ -61,18 +70,26 @@ groupByPost = foldr step Map.empty
   where
     step (Entity _ img) = Map.insertWith (++) (postImagePostId img) [img]
 
+buildTagMap :: [PostTagLink] -> [Entity PostTag] -> Map PostId [Text]
+buildTagMap links tagEnts = foldr step Map.empty links
+  where
+    tagById = Map.fromList [(entityKey t, postTagTag (entityVal t)) | t <- tagEnts]
+    step link m = case Map.lookup (postTagLinkTagId link) tagById of
+      Nothing   -> m
+      Just name -> Map.insertWith (++) (postTagLinkPostId link) [name] m
+
 statusVal :: PostStatus -> Text
-statusVal Wanted = "wanted"
+statusVal Wanted  = "wanted"
 statusVal Ordered = "ordered"
-statusVal Bought = "bought"
+statusVal Bought  = "bought"
 
 parseStatus :: Text -> Maybe PostStatus
-parseStatus "wanted" = Just Wanted
+parseStatus "wanted"  = Just Wanted
 parseStatus "ordered" = Just Ordered
-parseStatus "bought" = Just Bought
-parseStatus _ = Nothing
+parseStatus "bought"  = Just Bought
+parseStatus _         = Nothing
 
 statusLabel :: PostStatus -> Text
-statusLabel Wanted = "Ønsket"
+statusLabel Wanted  = "Ønsket"
 statusLabel Ordered = "Bestilt"
-statusLabel Bought = "Kjøpt"
+statusLabel Bought  = "Kjøpt"
