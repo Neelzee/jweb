@@ -23,19 +23,26 @@ User
   deriving Show
 
 Post
-  createdAt   UTCTime
-  status      PostStatus
-  name        Text
-  description Text
-  link        Text Maybe
-  videoUrl    Text Maybe
-  createdBy   UserId
-  deletedAt   UTCTime Maybe
+  createdAt    UTCTime
+  status       PostStatus
+  name         Text
+  description  Text
+  link         Text Maybe
+  videoUrl     Text Maybe
+  createdBy    UserId
+  deletedAt    UTCTime Maybe
   deriving Show
 
 PostImage
-  postId    PostId
-  filePath  Text
-  sortOrder Int
+  postId       PostId
+  filePath     Text
+  sortOrder    Int
   deriving Show
+
+PostTag
+  tag          Text
+
+PostTagLink
+  tagId        PostTagId
+  postId       PostId
 |]

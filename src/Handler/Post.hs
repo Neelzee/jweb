@@ -6,16 +6,20 @@ import qualified Data.Text as T
 import Data.Time (UTCTime, getCurrentTime)
 import Data.UUID (toString)
 import Data.UUID.V4 (nextRandom)
+import Data.Int (Int64)
+import Data.Maybe (mapMaybe)
+import Text.Read (readMaybe)
 import Database.Persist
-  ( SelectOpt (..),
-    get,
-    insert,
-    insert_,
-    selectList,
-    update,
-    (=.),
-    (==.),
+  ( SelectOpt (..)
+  , get
+  , insert
+  , insert_
+  , selectList
+  , update
+  , (=.)
+  , (==.)
   )
+import Database.Persist.Sql (fromSqlKey, toSqlKey)
 import Foundation
 import Model
 import Network.HTTP.Types (ok200)
@@ -26,19 +30,21 @@ import Yesod
 getPostNewR :: Handler Html
 getPostNewR = do
   _ <- requireLogin
+  allTags <- runDB $ selectList [] []
   defaultLayout $ do
-    setTitle "New Post"
+    setTitle "Nytt ønske"
     [whamlet|
       <h1>New post
-      ^{postForm Nothing}
+      ^{postForm Nothing allTags []}
     |]
 
 postPostNewR :: Handler Html
 postPostNewR = do
   uid <- requireLogin
   now <- liftIO getCurrentTime
-  post <- readPostForm
+  (post, tagIds) <- readPostForm
   pid <- runDB $ Database.Persist.insert (post now uid)
+  runDB $ mapM_ (\tid -> insert_ (PostTagLink tid pid)) tagIds
   handleImageUploads pid
   redirect HomeR
 
@@ -46,11 +52,14 @@ getPostEditR :: PostId -> Handler Html
 getPostEditR pid = do
   _ <- requireLogin
   post <- runDB (Database.Persist.get pid) >>= maybe notFound pure
+  allTags <- runDB $ selectList [] []
+  links <- runDB $ selectList [PostTagLinkPostId ==. pid] []
+  let selectedIds = map (postTagLinkTagId . entityVal) links
   defaultLayout $ do
-    setTitle "Edit Post"
+    setTitle "Rediger ønske"
     [whamlet|
       <h1>Edit post
-      ^{postForm (Just post)}
+      ^{postForm (Just post) allTags selectedIds}
       <button
         hx-post=@{PostDeleteR pid}
         hx-confirm="Delete this post?">Slett ønske
@@ -60,7 +69,9 @@ postPostEditR :: PostId -> Handler Html
 postPostEditR pid = do
   uid <- requireLogin
   now <- liftIO getCurrentTime
-  mkPost <- readPostForm
+  (mkPost, tagIds) <- readPostForm
+  runDB $ deleteWhere [PostTagLinkPostId ==. pid]
+  runDB $ mapM_ (\tid -> insert_ (PostTagLink tid pid)) tagIds
   let p = mkPost now uid
   runDB $
     Database.Persist.update
@@ -93,10 +104,14 @@ getUploadsR filename = do
 
 -- Helpers
 
-postForm :: Maybe Post -> Widget
-postForm mPost =
+postForm :: Maybe Post -> [Entity PostTag] -> [PostTagId] -> Widget
+postForm mPost allTags selectedIds =
   [whamlet|
   <form method="post" enctype="multipart/form-data">
+    <Label>Kategori
+    <select name="tags" multiple>
+      $forall (tagKey, tagName, isSelected) <- tagData
+        <option value="#{tagKey}" :isSelected:selected>#{tagName}
     <label>Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required>
     <label>Beskrivelse
@@ -115,6 +130,8 @@ postForm mPost =
 |]
   where
     currentStatus = maybe "wanted" (statusVal . postStatus) mPost
+    tagData :: [(Int64, Text, Bool)]
+    tagData = map (\(Entity tid ptag) -> (fromSqlKey tid, postTagTag ptag, tid `elem` selectedIds)) allTags
 
 statusOptions :: [(Text, Text)]
 statusOptions =
@@ -133,24 +150,29 @@ parseStatusField "ordered" = Ordered
 parseStatusField "bought" = Bought
 parseStatusField _ = Wanted
 
-readPostForm :: Handler (UTCTime -> UserId -> Post)
+readPostForm :: Handler (UTCTime -> UserId -> Post, [PostTagId])
 readPostForm = do
   name <- runInputPost $ ireq textField "name"
   description <- maybe "" id <$> runInputPost (iopt textField "description")
   statusText <- runInputPost $ ireq textField "status"
   mLink <- runInputPost $ iopt urlField "link"
   mVideo <- runInputPost $ iopt urlField "videoUrl"
-  pure $ \now uid ->
-    Post
-      { postCreatedAt = now,
-        postStatus = parseStatusField statusText,
-        postName = name,
-        postDescription = description,
-        postLink = mLink,
-        postVideoUrl = mVideo,
-        postCreatedBy = uid,
-        postDeletedAt = Nothing
-      }
+  tagTexts <- lookupPostParams "tags"
+  let tagIds = mapMaybe (fmap toSqlKey . readMaybe . T.unpack) tagTexts
+  pure
+    ( \now uid ->
+        Post
+          { postCreatedAt = now,
+            postStatus = parseStatusField statusText,
+            postName = name,
+            postDescription = description,
+            postLink = mLink,
+            postVideoUrl = mVideo,
+            postCreatedBy = uid,
+            postDeletedAt = Nothing
+          }
+    , tagIds
+    )
 
 handleImageUploads :: PostId -> Handler ()
 handleImageUploads pid = do
