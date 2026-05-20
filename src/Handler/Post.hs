@@ -115,9 +115,6 @@ postForm mPost allTags selectedIds =
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="tags" value="#{tagKey}" :isSelected:checked>
             #{tagName}
-      <div id="tag-creator" class="flex items-center gap-2">
-        <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
-          + Ny kategori
       <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
         Rediger kategorier
     <label class="block text-sm font-semibold mb-1.5">Namn

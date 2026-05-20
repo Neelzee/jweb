@@ -73,6 +73,9 @@ getTagInlineR = do
               hx-swap="delete"
               hx-confirm="Slette «#{postTagTag tag}»? Dette fjerner taggen fra alle innlegg.">
               Slett
+      <div id="tag-creator" class="flex items-center gap-2 mt-2">
+        <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
+          + Ny kategori
       <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagSelectR} hx-target="#tags-area" hx-swap="innerHTML">
         Tilbake
     |]
@@ -91,9 +94,6 @@ getTagSelectR = do
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="tags" value="#{fromSqlKey tid}">
             #{postTagTag tag}
-      <div id="tag-creator" class="flex items-center gap-2">
-        <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
-          + Ny kategori
       <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
         Rediger kategorier
     |]
