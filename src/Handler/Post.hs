@@ -131,6 +131,7 @@ postForm mPost allTags selectedIds =
     <label>Bilder
     <input type="file" name="images" accept="image/*" multiple>
     <button type="submit">Lagre
+    <a href="/">Avbryt
 |]
   where
     currentStatus = maybe "wanted" (statusVal . postStatus) mPost
