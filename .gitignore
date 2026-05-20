@@ -7,3 +7,6 @@ upload
 .session.aes
 result
 static/style.css
+static/main.js
+output
+.spago

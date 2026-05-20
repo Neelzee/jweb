@@ -6,6 +6,8 @@
     devenv.inputs.nixpkgs.follows = "nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
     haskell-flake.url = "github:srid/haskell-flake";
+    purescript-overlay.url = "github:thomashoneyman/purescript-overlay";
+    purescript-overlay.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   nixConfig = {
@@ -20,15 +22,41 @@
 
       perSystem = { self', pkgs, lib, ... }:
       let
+        psPkgs = pkgs.extend inputs.purescript-overlay.overlays.default;
         tailwindCSS = pkgs.runCommand "jweb-tailwind-css " {
           nativeBuildInputs = [ pkgs.tailwindcss ];
         } ''
-          mkdir -p $out src static
-          cp -r ${./src}/. src/
+          mkdir -p $out lib static
+          cp -r ${./lib}/. lib/
           cp ${./static/input.css} static/input.css
           cp ${./tailwind.config.js} tailwind.config.js
           tailwindcss -i static/input.css -o $out/style.css --minify
         '';
+        jweb-js = psPkgs.stdenv.mkDerivation {
+          name = "jweb-js";
+          src = ./.;
+          nativeBuildInputs =
+          [
+            psPkgs.purs
+            psPkgs.spago-unstable
+            pkgs.git
+            pkgs.cacert
+            pkgs.esbuild
+          ];
+          outputHashMode = "recursive";
+          outputHashAlgo = "sha256";
+          outputHash = "sha256-+ICMatyx9mch3qkBzDuLZbsdQkCJQXi8RVtD6W1Hkh8=";
+          buildPhase = ''
+            export HOME=$TMPDIR
+            export GIT_SSL_CAINFO="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
+            spago install
+            spago bundle
+          '';
+          installPhase = ''
+            mkdir -p $out
+            cp main.js $out/
+          '';
+        };
       in
       {
 
@@ -57,6 +85,7 @@
                   mkdir -p $out/share/jweb
                   cp -r --no-preserve=mode ${./static} $out/share/jweb/static
                   cp ${tailwindCSS}/style.css $out/share/jweb/static/style.css
+                  cp ${jweb-js}/main.js $out/share/jweb/static/main.js
                 '';
               });
             };
@@ -71,7 +100,9 @@
             tools = hp: {
               #fourmolu = hp.fourmolu;
               #ghcid = null;
-              tailwindcss = pkgs.tailwindcss;
+              inherit (pkgs) tailwindcss;
+              inherit (pkgs) esbuild;
+              inherit (psPkgs) purs spago-unstable;
             };
 
             mkShellArgs = {
@@ -93,6 +124,8 @@
 
         # haskell-flake doesn't set the default package, but you can do it here.
         packages.default = self'.packages.jweb;
+
+        packages.jweb-js = jweb-js;
 
         packages.docker = pkgs.dockerTools.buildLayeredImage {
           name = "jweb";

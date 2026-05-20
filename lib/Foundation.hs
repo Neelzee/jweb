@@ -59,6 +59,7 @@ instance Yesod App where
           <title>#{pageTitle pc}
           <link rel="stylesheet" href=@{StaticR "output.css"}>
           <script src="https://unpkg.com/htmx.org@2.0.4" defer>
+          <script src=@{StaticR "main.js"} defer>
           <script>
             document.addEventListener('DOMContentLoaded', function () {
               document.addEventListener('htmx:configRequest', function (e) {
@@ -75,7 +76,7 @@ instance Yesod App where
                 $maybe token <- mToken
                   <input type="hidden" name="_token" value="#{token}">
                 <button type="submit" class="rounded border px-3.5 py-1.5 text-sm font-medium font-[inherit] cursor-pointer transition-colors">Logg ut
-              <div class="sm:hidden relative">
+              <div class="sm:hidden relative" data-menu-wrapper>
                 <button type="button" onclick="var m=document.getElementById('mobile-menu');m.classList.toggle('hidden')" class="rounded border px-3 py-1.5 text-sm cursor-pointer font-[inherit]">&#9776;
                 <div id="mobile-menu" class="hidden absolute right-0 top-10 border rounded-lg shadow-lg z-50 w-36 bg-white">
                   <a href=@{TrashR} class="block px-4 py-2.5 text-sm font-medium no-underline">Papirkurv

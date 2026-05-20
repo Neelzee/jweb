@@ -1,0 +1,22 @@
+package:
+  name: ps-jweb
+  dependencies:
+    - effect
+    - maybe
+    - prelude
+    - unsafe-coerce
+    - web-dom
+    - web-events
+    - web-html
+  build:
+    pedanticPackages: true
+    strict: true
+  bundle:
+    minify: true
+    module: Main
+    outfile: "./static/main.js"
+    platform: browser
+workspace:
+  packageSet:
+    registry: 77.3.0
+  extraPackages: {}

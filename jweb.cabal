@@ -27,7 +27,7 @@ common shared
 
 library
   import:          shared
-  hs-source-dirs:  src
+  hs-source-dirs:  lib
   exposed-modules:
       Foundation
     , Application
