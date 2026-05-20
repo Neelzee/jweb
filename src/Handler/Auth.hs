@@ -19,11 +19,11 @@ getAuthLoginR = do
     Nothing -> defaultLayout $ do
       setTitle "Login"
       [whamlet|
-        <div #login-area>
-          <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
-            <label>Email
-            <input type="email" name="email" placeholder="your@email.com" required autofocus>
-            <button type="submit">Fortsett
+        <div id="login-area" class="max-w-sm mx-auto mt-20 border rounded-2xl p-9 shadow-md">
+          <form class="flex flex-col gap-4" hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
+            <label class="block text-sm font-semibold mb-1.5">Email
+            <input type="email" name="email" placeholder="your@email.com" required autofocus class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+            <button type="submit" class="px-5 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition">Fortsett
       |]
 
 postAuthLoginR :: Handler Html
@@ -41,8 +41,8 @@ handleEmailStep email = do
   unless (Whitelist.member email) $
     sendFragment
       [hamlet|
-      <div #login-area>
-        <p .error>Not authorized.
+      <div id="login-area" class="max-w-sm mx-auto mt-20 border rounded-2xl p-9 shadow-md">
+        <p class="error text-sm">Not authorized.
     |]
   mUser <- runDB $ getBy (UniqueEmail email)
   case mUser of
@@ -50,28 +50,28 @@ handleEmailStep email = do
       | isJust (userPasswordHash user) ->
           sendFragment
             [hamlet|
-        <div #login-area>
-          <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
+        <div id="login-area" class="max-w-sm mx-auto mt-20 border rounded-2xl p-9 shadow-md">
+          <form class="flex flex-col gap-4" hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
             <input type="hidden" name="email" value="#{email}">
             <input type="hidden" name="step" value="login">
-            <p>Velkommen, #{userName user}
-            <label>Passord
-            <input type="password" name="password" placeholder="Passord" required autofocus>
-            <button type="submit">Logg inn
+            <p class="text-sm mb-3.5">Velkommen, #{userName user}
+            <label class="block text-sm font-semibold mb-1.5">Passord
+            <input type="password" name="password" placeholder="Passord" required autofocus class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+            <button type="submit" class="px-5 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition">Logg inn
       |]
     _ ->
       sendFragment
         [hamlet|
-        <div #login-area>
-          <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
+        <div id="login-area" class="max-w-sm mx-auto mt-20 border rounded-2xl p-9 shadow-md">
+          <form class="flex flex-col gap-4" hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
             <input type="hidden" name="email" value="#{email}">
             <input type="hidden" name="step" value="setup">
-            <p>Sett eit passord for #{email}
-            <label>Passord
-            <input type="password" name="password" placeholder="Password" required autofocus>
-            <label>Bekreft
-            <input type="password" name="confirm" placeholder="Confirm password" required>
-            <button type="submit">Sett passord
+            <p class="text-sm mb-3.5">Sett eit passord for #{email}
+            <label class="block text-sm font-semibold mb-1.5">Passord
+            <input type="password" name="password" placeholder="Password" required autofocus class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+            <label class="block text-sm font-semibold mb-1.5">Bekreft
+            <input type="password" name="confirm" placeholder="Confirm password" required class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+            <button type="submit" class="px-5 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition">Sett passord
       |]
 
 handlePasswordStep :: Text -> Handler Html
@@ -93,14 +93,14 @@ handlePasswordStep email = do
             else
               sendFragment
                 [hamlet|
-              <div #login-area>
-                <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
+              <div id="login-area" class="max-w-sm mx-auto mt-20 border rounded-2xl p-9 shadow-md">
+                <form class="flex flex-col gap-4" hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
                   <input type="hidden" name="email" value="#{email}">
                   <input type="hidden" name="step" value="login">
-                  <p .error>Feil passord.
-                  <label>Passord
-                  <input type="password" name="password" required autofocus>
-                  <button type="submit">Logg inn
+                  <p class="error text-sm mb-3.5">Feil passord.
+                  <label class="block text-sm font-semibold mb-1.5">Passord
+                  <input type="password" name="password" required autofocus class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+                  <button type="submit" class="px-5 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition">Logg inn
             |]
 
 handleSetupStep :: Text -> Handler Html
@@ -111,16 +111,16 @@ handleSetupStep email = do
   when (password /= confirm) $
     sendFragment
       [hamlet|
-      <div #login-area>
-        <form hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
+      <div id="login-area" class="max-w-sm mx-auto mt-20 border rounded-2xl p-9 shadow-md">
+        <form class="flex flex-col gap-4" hx-post=@{AuthLoginR} hx-target="#login-area" hx-swap="outerHTML">
           <input type="hidden" name="email" value="#{email}">
           <input type="hidden" name="step" value="setup">
-          <p .error>Passorda er ikkje like.
-          <label>Passord
-          <input type="password" name="password" required autofocus>
-          <label>Bekreft
-          <input type="password" name="confirm" required>
-          <button type="submit">Sett passord
+          <p class="error text-sm mb-3.5">Passorda er ikkje like.
+          <label class="block text-sm font-semibold mb-1.5">Passord
+          <input type="password" name="password" required autofocus class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+          <label class="block text-sm font-semibold mb-1.5">Bekreft
+          <input type="password" name="confirm" required class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+          <button type="submit" class="px-5 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition">Sett passord
     |]
   mHash <- liftIO $ hashPwd password
   hash <- maybe errInternal pure mHash
@@ -156,7 +156,11 @@ checkPwd :: Text -> Text -> Bool
 checkPwd hash pwd = BCrypt.validatePassword (encodeUtf8 hash) (encodeUtf8 pwd)
 
 errNotAuthorized :: HtmlUrl (Route App)
-errNotAuthorized = [hamlet|<div #login-area><p .error>Not authorized.|]
+errNotAuthorized =
+  [hamlet|
+    <div id="login-area" class="max-w-sm mx-auto mt-20 border rounded-2xl p-9 shadow-md">
+      <p class="error text-sm">Not authorized.
+  |]
 
 errInternal :: Handler a
 errInternal = sendResponseStatus internalServerError500 ("Internal error" :: Text)

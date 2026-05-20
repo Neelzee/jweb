@@ -34,7 +34,7 @@ getPostNewR = do
   defaultLayout $ do
     setTitle "Nytt ønske"
     [whamlet|
-      <h1>New post
+      <h1 class="text-xl font-bold tracking-tight mb-6">New post
       ^{postForm Nothing allTags []}
     |]
 
@@ -58,11 +58,11 @@ getPostEditR pid = do
   defaultLayout $ do
     setTitle "Rediger ønske"
     [whamlet|
-      <h1>Edit post
+      <h1 class="text-xl font-bold tracking-tight mb-6">Edit post
       ^{postForm (Just post) allTags selectedIds}
-      <button
+      <button class="mt-2 px-3 py-1.5 rounded-lg text-sm font-medium font-[inherit] border-0 cursor-pointer transition"
         hx-post=@{PostDeleteR pid}
-        hx-confirm="Delete this post?">Slett ønske
+        hx-confirm="Slett ønske?=">Slett ønske
     |]
 
 postPostEditR :: PostId -> Handler Html
@@ -107,33 +107,34 @@ getUploadsR filename = do
 postForm :: Maybe Post -> [Entity PostTag] -> [PostTagId] -> Widget
 postForm mPost allTags selectedIds =
   [whamlet|
-  <form method="post" enctype="multipart/form-data">
-    <div id="tags-area">
-      <label>Kategori
-      <select id="tags-select" name="tags" multiple>
+  <form class="flex flex-col gap-4 max-w-lg" method="post" enctype="multipart/form-data">
+    <div id="tags-area" class="flex flex-col gap-2">
+      <label class="block text-sm font-semibold mb-1.5">Kategori
+      <select id="tags-select" name="tags" multiple class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
         $forall (tagKey, tagName, isSelected) <- tagData
           <option value="#{tagKey}" id="tag-option-#{tagKey}" class="tag-option" :isSelected:selected>#{tagName}
-      <div id="tag-creator">
-        <button type="button" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
+      <div id="tag-creator" class="flex items-center gap-2">
+        <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
           + Ny kategori
-      <button type="button" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
         Rediger kategorier
-    <label>Namn
-    <input type="text" name="name" value="#{maybe "" postName mPost}" required>
-    <label>Beskrivelse
-    <textarea name="description">#{maybe "" postDescription mPost}
-    <label>Status
-    <select name="status">
+    <label class="block text-sm font-semibold mb-1.5">Namn
+    <input type="text" name="name" value="#{maybe "" postName mPost}" required class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+    <label class="block text-sm font-semibold mb-1.5">Beskrivelse
+    <textarea name="description" class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition min-h-28 resize-y leading-normal">#{maybe "" postDescription mPost}
+    <label class="block text-sm font-semibold mb-1.5">Status
+    <select name="status" class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
       $forall (val, lbl) <- statusOptions
         <option value="#{val}" :currentStatus == val:selected>#{lbl}
-    <label>Produkt link
-    <input type="url" name="link" value="#{maybe "" (maybe "" id . postLink) mPost}">
-    <label>Video URL
-    <input type="url" name="videoUrl" value="#{maybe "" (maybe "" id . postVideoUrl) mPost}">
-    <label>Bilder
-    <input type="file" name="images" accept="image/*" multiple>
-    <button type="submit">Lagre
-    <a href="/">Avbryt
+    <label class="block text-sm font-semibold mb-1.5">Produkt link
+    <input type="url" name="link" value="#{maybe "" (maybe "" id . postLink) mPost}" class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+    <label class="block text-sm font-semibold mb-1.5">Video URL
+    <input type="url" name="videoUrl" value="#{maybe "" (maybe "" id . postVideoUrl) mPost}" class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
+    <label class="block text-sm font-semibold mb-1.5">Bilder
+    <input type="file" name="images" accept="image/*" multiple class="w-full px-3 py-2 text-sm font-[inherit] border rounded-lg cursor-pointer">
+    <div class="flex items-center gap-4">
+      <button type="submit" class="px-5 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition">Lagre
+      <a href="/" class="text-sm font-medium no-underline">Avbryt
 |]
   where
     currentStatus = maybe "wanted" (statusVal . postStatus) mPost

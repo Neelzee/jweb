@@ -18,9 +18,9 @@ getTagNewR = do
   _ <- requireLogin
   renderFragment
     [hamlet|
-      <form hx-post=@{TagCreateR} hx-target="#tag-creator" hx-swap="innerHTML">
-        <input type="text" name="tag" required placeholder="Ny kategori">
-        <button type="submit">Opprett
+      <form class="flex items-center gap-2" hx-post=@{TagCreateR} hx-target="#tag-creator" hx-swap="innerHTML">
+        <input type="text" name="tag" required placeholder="Ny kategori" class="px-2 py-1 border rounded text-sm font-[inherit]">
+        <button type="submit" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]">Opprett
     |]
 
 postTagCreateR :: Handler Html
@@ -38,7 +38,7 @@ postTagCreateR = do
     Just tid ->
       renderFragment
         [hamlet|
-          <button type="button" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
+          <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
             + Ny kategori
           <select hx-swap-oob="beforeend:#tags-select" style="display:none">
             <option value="#{fromSqlKey tid}" selected>#{trimmed}
@@ -55,22 +55,22 @@ getTagInlineR = do
       countMap = foldr (\(Entity _ l) m -> Map.insertWith (+) (postTagLinkTagId l) 1 m) Map.empty links
   renderFragment
     [hamlet|
-      <ul>
+      <ul class="flex flex-col gap-2 list-none">
         $forall Entity tid tag <- tags
-          <li id="tag-#{fromSqlKey tid}">
+          <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
             #{postTagTag tag}
-            <small> (#{Map.findWithDefault 0 tid countMap} innlegg)
-            <button type="button"
+            <small>(#{Map.findWithDefault 0 tid countMap} innlegg)
+            <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
               hx-get=@{TagEditR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">Rediger
-            <button
+            <button class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
               hx-post=@{TagDeleteR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
               hx-confirm="Slette «#{postTagTag tag}»? Dette fjerner taggen fra alle innlegg.">
               Slett
-      <button type="button" hx-get=@{TagSelectR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagSelectR} hx-target="#tags-area" hx-swap="innerHTML">
         Tilbake
     |]
 
@@ -82,14 +82,14 @@ getTagSelectR = do
   allTags <- runDB $ selectList [] [Asc PostTagTag]
   renderFragment
     [hamlet|
-      <label>Kategori
-      <select id="tags-select" name="tags" multiple>
+      <label class="block text-sm font-semibold mb-1.5">Kategori
+      <select id="tags-select" name="tags" multiple class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
         $forall Entity tid tag <- allTags
           <option value="#{fromSqlKey tid}">#{postTagTag tag}
-      <div id="tag-creator">
-        <button type="button" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
+      <div id="tag-creator" class="flex items-center gap-2">
+        <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
           + Ny kategori
-      <button type="button" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
         Rediger kategorier
     |]
 
@@ -105,17 +105,17 @@ getTagListR = do
   defaultLayout $ do
     setTitle "Kategorier"
     [whamlet|
-      <h1>Kategorier
-      <ul>
+      <h1 class="text-xl font-bold tracking-tight mb-6">Kategorier
+      <ul class="flex flex-col gap-2 list-none">
         $forall Entity tid tag <- tags
-          <li id="tag-#{fromSqlKey tid}">
+          <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
             #{postTagTag tag}
-            <small> (#{Map.findWithDefault 0 tid countMap} innlegg)
-            <button type="button"
+            <small>(#{Map.findWithDefault 0 tid countMap} innlegg)
+            <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
               hx-get=@{TagEditR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">Rediger
-            <button
+            <button class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
               hx-post=@{TagDeleteR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
@@ -131,13 +131,13 @@ getTagEditR tid = do
   tag <- runDB (get tid) >>= maybe notFound pure
   renderFragment
     [hamlet|
-      <li id="tag-#{fromSqlKey tid}">
-        <form hx-post=@{TagEditR tid}
+      <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
+        <form class="flex items-center gap-2" hx-post=@{TagEditR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">
-          <input type="text" name="tag" value="#{postTagTag tag}" required>
-          <button type="submit">Lagre
-          <button type="button"
+          <input type="text" name="tag" value="#{postTagTag tag}" required class="px-2 py-1 border rounded text-sm font-[inherit]">
+          <button type="submit" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]">Lagre
+          <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
             hx-get=@{TagRowR tid}
             hx-target="#tag-#{fromSqlKey tid}"
             hx-swap="outerHTML">Avbryt
@@ -180,14 +180,14 @@ renderTagRow :: PostTagId -> Text -> Int -> Handler Html
 renderTagRow tid name count =
   renderFragment
     [hamlet|
-      <li id="tag-#{fromSqlKey tid}">
+      <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
         #{name}
-        <small> (#{count} innlegg)
-        <button type="button"
+        <small>(#{count} innlegg)
+        <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
           hx-get=@{TagEditR tid}
           hx-target="#tag-#{fromSqlKey tid}"
           hx-swap="outerHTML">Rediger
-        <button
+        <button class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
           hx-post=@{TagDeleteR tid}
           hx-target="#tag-#{fromSqlKey tid}"
           hx-swap="delete"

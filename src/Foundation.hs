@@ -57,7 +57,7 @@ instance Yesod App where
           $maybe token <- mToken
             <meta name="csrf-token" content="#{token}">
           <title>#{pageTitle pc}
-          <link rel="stylesheet" href=@{StaticR "style.css"}>
+          <link rel="stylesheet" href=@{StaticR "output.css"}>
           <script src="https://unpkg.com/htmx.org@2.0.4" defer>
           <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -68,14 +68,14 @@ instance Yesod App where
             });
           ^{pageHead pc}
         <body>
-          <header>
-            <a href=@{HomeR}>Ønskeliste</a>
+          <header class="sticky top-0 z-10 flex items-center justify-between px-8 h-14 border-b shadow-sm">
+            <a href=@{HomeR} class="text-base font-bold no-underline tracking-tight">Ønskeliste</a>
             $if loggedIn
-              <form method="post" action=@{AuthLogoutR}>
+              <form method="post" action=@{AuthLogoutR} class="flex items-center">
                 $maybe token <- mToken
                   <input type="hidden" name="_token" value="#{token}">
-                <button class="log-out" type="submit">Logg ut
-          <main>
+                <button type="submit" class="rounded border px-3.5 py-1.5 text-sm font-medium font-[inherit] cursor-pointer transition-colors">Logg ut
+          <main class="max-w-[52rem] mx-auto mt-10 px-6">
             ^{pageBody pc}
     |]
 

@@ -18,27 +18,27 @@ getTrashR = do
   defaultLayout $ do
     setTitle "Papirkurv"
     [whamlet|
-      <h1>Papirkurv
+      <h1 class="text-xl font-bold tracking-tight mb-6">Papirkurv
       $if null posts
-        <p .muted>Ingen slettede ønsker.
+        <p class="muted text-sm">Ingen slettede ønsker.
       $else
-        <ul #posts>
+        <ul id="posts" class="list-none flex flex-col gap-3">
           $forall Entity pid post <- posts
-            <li>
-              <div .post-header>
+            <li class="rounded-xl border p-5 shadow-sm transition">
+              <div class="flex items-center gap-2 mb-2">
                 <strong>#{postName post}
-                <span .status .status-deleted>Slettet
+                <span class="status-deleted text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border">Slettet
               $with imgs <- Map.findWithDefault [] pid imageMap
                 $if not (null imgs)
-                  <div .post-images>
+                  <div class="flex flex-wrap gap-2 mb-4">
                     $forall img <- imgs
-                      <img src=@{UploadsR (postImageFilePath img)} alt="#{postName post}">
-              <p .description>#{postDescription post}
-              <div .post-actions>
-                <form method="post" action=@{PostRestoreR pid}>
+                      <img src=@{UploadsR (postImageFilePath img)} alt="#{postName post}" class="w-28 h-28 object-cover rounded-lg border transition hover:scale-[1.04]">
+              <p class="text-sm mb-2.5 leading-normal">#{postDescription post}
+              <div class="flex items-center gap-3 mt-3.5 pt-3.5 border-t">
+                <form class="contents" method="post" action=@{PostRestoreR pid}>
                   $maybe token <- mToken
                     <input type="hidden" name="_token" value="#{token}">
-                  <button type="submit">Gjenopprett
+                  <button type="submit" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer transition-colors">Gjenopprett
     |]
 
 postPostRestoreR :: PostId -> Handler ()

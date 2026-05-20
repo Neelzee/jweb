@@ -18,7 +18,19 @@
       systems = nixpkgs.lib.systems.flakeExposed;
       imports = [ inputs.haskell-flake.flakeModule ];
 
-      perSystem = { self', pkgs, lib, ... }: {
+      perSystem = { self', pkgs, lib, ... }:
+      let
+        tailwindCSS = pkgs.runCommand "jweb-tailwind-css " {
+          nativeBuildInputs = [ pkgs.tailwindcss ];
+        } ''
+          mkdir -p $out src static
+          cp -r ${./src}/. src/
+          cp ${./static/input.css} static/input.css
+          cp ${./tailwind.config.js} tailwind.config.js
+          tailwindcss -i static/input.css -o $out/style.css --minify
+        '';
+      in
+      {
 
         # Typically, you just want a single project named "default". But
         # multiple projects are also possible, each using different GHC version.
@@ -43,7 +55,8 @@
               custom = drv: drv.overrideAttrs (old: {
                 postInstall = (old.postInstall or "") + ''
                   mkdir -p $out/share/jweb
-                  cp -r ${./static} $out/share/jweb/static
+                  cp -r --no-preserve=mode ${./static} $out/share/jweb/static
+                  cp ${tailwindCSS}/style.css $out/share/jweb/static/style.css
                 '';
               });
             };
@@ -58,6 +71,7 @@
             tools = hp: {
               #fourmolu = hp.fourmolu;
               #ghcid = null;
+              tailwindcss = pkgs.tailwindcss;
             };
 
             mkShellArgs = {

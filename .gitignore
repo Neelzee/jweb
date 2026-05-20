@@ -6,3 +6,4 @@ dist-newstyle
 upload
 .session.aes
 result
+static/style.css
