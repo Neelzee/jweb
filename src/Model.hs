@@ -41,6 +41,7 @@ PostImage
 
 PostTag
   tag          Text
+  UniqueTag    tag
 
 PostTagLink
   tagId        PostTagId

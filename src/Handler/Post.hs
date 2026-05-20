@@ -108,10 +108,13 @@ postForm :: Maybe Post -> [Entity PostTag] -> [PostTagId] -> Widget
 postForm mPost allTags selectedIds =
   [whamlet|
   <form method="post" enctype="multipart/form-data">
-    <Label>Kategori
-    <select name="tags" multiple>
+    <label>Kategori
+    <select id="tags-select" name="tags" multiple>
       $forall (tagKey, tagName, isSelected) <- tagData
         <option value="#{tagKey}" :isSelected:selected>#{tagName}
+    <div id="tag-creator">
+      <button type="button" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
+        + Ny kategori
     <label>Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required>
     <label>Beskrivelse
