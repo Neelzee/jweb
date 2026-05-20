@@ -44,6 +44,55 @@ postTagCreateR = do
             <option value="#{fromSqlKey tid}" selected>#{trimmed}
         |]
 
+-- Inline tag management fragment (loaded into #tags-area from the post form)
+
+getTagInlineR :: Handler Html
+getTagInlineR = do
+  _ <- requireLogin
+  tags  <- runDB $ selectList [] [Asc PostTagTag]
+  links <- runDB $ selectList [] []
+  let countMap :: Map PostTagId Int
+      countMap = foldr (\(Entity _ l) m -> Map.insertWith (+) (postTagLinkTagId l) 1 m) Map.empty links
+  renderFragment
+    [hamlet|
+      <ul>
+        $forall Entity tid tag <- tags
+          <li id="tag-#{fromSqlKey tid}">
+            #{postTagTag tag}
+            <small> (#{Map.findWithDefault 0 tid countMap} innlegg)
+            <button type="button"
+              hx-get=@{TagEditR tid}
+              hx-target="#tag-#{fromSqlKey tid}"
+              hx-swap="outerHTML">Rediger
+            <button
+              hx-post=@{TagDeleteR tid}
+              hx-target="#tag-#{fromSqlKey tid}"
+              hx-swap="delete"
+              hx-confirm="Slette «#{postTagTag tag}»? Dette fjerner taggen fra alle innlegg.">
+              Slett
+      <button type="button" hx-get=@{TagSelectR} hx-target="#tags-area" hx-swap="innerHTML">
+        Tilbake
+    |]
+
+-- Restores the tag selector (used by the Tilbake button in the inline manager)
+
+getTagSelectR :: Handler Html
+getTagSelectR = do
+  _ <- requireLogin
+  allTags <- runDB $ selectList [] [Asc PostTagTag]
+  renderFragment
+    [hamlet|
+      <label>Kategori
+      <select id="tags-select" name="tags" multiple>
+        $forall Entity tid tag <- allTags
+          <option value="#{fromSqlKey tid}">#{postTagTag tag}
+      <div id="tag-creator">
+        <button type="button" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
+          + Ny kategori
+      <button type="button" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+        Rediger kategorier
+    |]
+
 -- Tag management page
 
 getTagListR :: Handler Html

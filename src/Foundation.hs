@@ -29,6 +29,8 @@ mkYesodData
 /tag/new               TagNewR     GET
 /tag                   TagCreateR  POST
 /tags                  TagListR    GET
+/tags/inline           TagInlineR  GET
+/tags/select           TagSelectR  GET
 /tag/#PostTagId/edit   TagEditR    GET POST
 /tag/#PostTagId/delete TagDeleteR  POST
 /tag/#PostTagId/row    TagRowR     GET
