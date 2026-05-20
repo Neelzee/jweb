@@ -51,7 +51,7 @@ getHomeR = do
   defaultLayout $ do
     setTitle "Ønskeliste"
     [whamlet|
-      <div class="flex gap-8">
+      <div class="flex flex-col sm:flex-row gap-6 sm:gap-8">
         <aside class="w-44 shrink-0">
           <p class="text-xs font-semibold uppercase tracking-widest mb-3">Kategori
           <form method="get" action=@{HomeR}>
@@ -70,9 +70,10 @@ getHomeR = do
             <a href=@?{(HomeR, orderedParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Bestilt
             <a href=@?{(HomeR, boughtParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Kjøpt
             $if loggedIn
-              <a href=@{TrashR} class="filter-trash ml-auto px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Papirkurv
+              <a href=@{TrashR} class="filter-trash hidden sm:inline-flex ml-auto px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Papirkurv
           $if loggedIn
-            <a href=@{PostNewR} class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold mb-6 shadow-sm transition no-underline">+ Nytt ønske
+            <a href=@{PostNewR} class="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold mb-6 shadow-sm transition no-underline">+ Nytt ønske
+            <a href=@{PostNewR} class="sm:hidden fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold no-underline shadow-lg bg-green-600 text-white">+
           <ul id="posts" class="list-none flex flex-col gap-3">
             $forall Entity pid post <- posts
               <li class="rounded-xl border p-5 shadow-sm transition">
