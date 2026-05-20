@@ -18,7 +18,7 @@ getTagNewR = do
     [hamlet|
       <form class="flex items-center gap-2" hx-post=@{TagCreateR} hx-target="#tag-creator" hx-swap="innerHTML">
         <input type="text" name="tag" required placeholder="Ny kategori" class="px-2 py-1 border rounded text-sm font-[inherit]">
-        <button type="submit" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]">Opprett
+        <button type="submit" class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-green-600 text-white">Opprett
     |]
 
 postTagCreateR :: Handler Html
@@ -63,7 +63,7 @@ getTagInlineR = do
               hx-get=@{TagEditR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">Rediger
-            <button class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
+            <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
               hx-post=@{TagDeleteR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
@@ -112,7 +112,7 @@ getTagListR = do
               hx-get=@{TagEditR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">Rediger
-            <button class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
+            <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
               hx-post=@{TagDeleteR tid}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
@@ -133,8 +133,8 @@ getTagEditR tid = do
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">
           <input type="text" name="tag" value="#{postTagTag tag}" required class="px-2 py-1 border rounded text-sm font-[inherit]">
-          <button type="submit" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]">Lagre
-          <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
+          <button type="submit" class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-green-600 text-white">Lagre
+          <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit] text-red-600"
             hx-get=@{TagRowR tid}
             hx-target="#tag-#{fromSqlKey tid}"
             hx-swap="outerHTML">Avbryt
@@ -180,7 +180,7 @@ renderTagRow tid name count =
           hx-get=@{TagEditR tid}
           hx-target="#tag-#{fromSqlKey tid}"
           hx-swap="outerHTML">Rediger
-        <button class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
+        <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
           hx-post=@{TagDeleteR tid}
           hx-target="#tag-#{fromSqlKey tid}"
           hx-swap="delete"

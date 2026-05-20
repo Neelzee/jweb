@@ -35,7 +35,7 @@ getPostNewR = do
     setTitle "Nytt ønske"
     [whamlet|
       <h1 class="text-xl font-bold tracking-tight mb-6">New post
-      ^{postForm Nothing allTags []}
+      ^{postForm Nothing allTags [] Nothing}
     |]
 
 postPostNewR :: Handler Html
@@ -59,10 +59,7 @@ getPostEditR pid = do
     setTitle "Rediger ønske"
     [whamlet|
       <h1 class="text-xl font-bold tracking-tight mb-6">Rediger ønske
-      ^{postForm (Just post) allTags selectedIds}
-      <button class="mt-2 px-3 py-1.5 rounded-lg text-sm font-medium font-[inherit] border-0 cursor-pointer transition"
-        hx-post=@{PostDeleteR pid}
-        hx-confirm="Slett ønske?=">Slett ønske
+      ^{postForm (Just post) allTags selectedIds (Just pid)}
     |]
 
 postPostEditR :: PostId -> Handler Html
@@ -104,8 +101,8 @@ getUploadsR filename = do
 
 -- Helpers
 
-postForm :: Maybe Post -> [Entity PostTag] -> [PostTagId] -> Widget
-postForm mPost allTags selectedIds =
+postForm :: Maybe Post -> [Entity PostTag] -> [PostTagId] -> Maybe PostId -> Widget
+postForm mPost allTags selectedIds mPid =
   [whamlet|
   <form class="flex flex-col gap-4 max-w-lg" method="post" enctype="multipart/form-data">
     <div id="tags-area" class="flex flex-col gap-2">
@@ -132,8 +129,12 @@ postForm mPost allTags selectedIds =
     <label class="block text-sm font-semibold mb-1.5">Bilder
     <input type="file" name="images" accept="image/*" multiple class="w-full px-3 py-2 text-sm font-[inherit] border rounded-lg cursor-pointer">
     <div class="flex items-center gap-4">
-      <button type="submit" class="px-5 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition">Lagre
-      <a href="/" class="text-sm font-medium no-underline">Avbryt
+      <button type="submit" class="px-3 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition bg-green-600 text-white">Lagre
+      $maybe pid <- mPid
+        <button class="px-3 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer transition bg-red-600 text-white"
+          hx-post=@{PostDeleteR pid}
+          hx-confirm="Slett ønske?">Slett ønske
+      <a href="/" class="text-sm font-medium no-underline text-red-600">Avbryt
 |]
   where
     currentStatus = maybe "wanted" (statusVal . postStatus) mPost

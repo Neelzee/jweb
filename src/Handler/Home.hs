@@ -97,7 +97,7 @@ getHomeR = do
                 $if loggedIn
                   <div class="flex items-center gap-3 mt-3.5 pt-3.5 border-t">
                     <a href=@{PostEditR pid} class="text-sm font-medium no-underline transition-colors">Rediger
-                    <button class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer transition-colors"
+                    <button class="text-sm font-medium font-[inherit] px-2 py-0.5 rounded border-0 cursor-pointer transition-colors bg-red-600 text-white"
                       hx-post=@{PostDeleteR pid}
                       hx-confirm="Slett ønsket?">Slett
     |]
