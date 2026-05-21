@@ -15,7 +15,7 @@ getAuthLoginR :: Handler Html
 getAuthLoginR = do
   mUserId <- lookupSession "userId"
   case mUserId of
-    Just _ -> redirect HomeR
+    Just _ -> redirect JwebHomeR
     Nothing -> defaultLayout $ do
       setTitle "Login"
       [whamlet|
@@ -138,7 +138,7 @@ handleSetupStep email = do
 postAuthLogoutR :: Handler ()
 postAuthLogoutR = do
   deleteSession "userId"
-  redirect HomeR
+  redirect JwebHomeR
 
 -- Helpers
 

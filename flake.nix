@@ -104,6 +104,8 @@
               inherit (pkgs) esbuild;
               inherit (psPkgs) purs spago-unstable;
               inherit (pkgs) skopeo;
+              inherit (pkgs) openapi-generator-cli;
+              inherit (pkgs) just;
             };
 
             mkShellArgs = {

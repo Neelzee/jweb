@@ -12,8 +12,8 @@ import Model
 import Text.Read (readMaybe)
 import Yesod
 
-getHomeR :: Handler Html
-getHomeR = do
+getJwebHomeR :: Handler Html
+getJwebHomeR = do
   mStatusParam <- lookupGetParam "status"
   mTagParam    <- lookupGetParam "tag"
   let mStatus = mStatusParam >>= parseStatus
@@ -54,7 +54,7 @@ getHomeR = do
       <div class="flex flex-col sm:flex-row gap-6 sm:gap-8">
         <aside class="w-44 shrink-0">
           <p class="text-xs font-semibold uppercase tracking-widest mb-3">Kategori
-          <form method="get" action=@{HomeR}>
+          <form method="get" action=@{JwebHomeR}>
             $maybe status <- mStatusParam
               <input type="hidden" name="status" value="#{status}">
             <select class="w-full border rounded-lg px-3 py-2 text-sm font-[inherit] cursor-pointer"
@@ -65,10 +65,10 @@ getHomeR = do
                 <option value="#{fromSqlKey tid}" :mTagId == Just tid:selected>#{postTagTag tag}
         <div class="flex-1 min-w-0">
           <nav class="flex flex-wrap gap-1.5 mb-6 items-center">
-            <a href=@?{(HomeR, tagParam)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Alle
-            <a href=@?{(HomeR, wantedParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Ønsket
-            <a href=@?{(HomeR, orderedParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Bestilt
-            <a href=@?{(HomeR, boughtParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Kjøpt
+            <a href=@?{(JwebHomeR, tagParam)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Alle
+            <a href=@?{(JwebHomeR, wantedParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Ønsket
+            <a href=@?{(JwebHomeR, orderedParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Bestilt
+            <a href=@?{(JwebHomeR, boughtParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Kjøpt
             $if loggedIn
               <a href=@{TrashR} class="filter-trash hidden sm:inline-flex ml-auto px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Papirkurv
           $if loggedIn
@@ -89,7 +89,7 @@ getHomeR = do
                   $if not (null imgs)
                     <div class="flex flex-wrap gap-2 mb-4">
                       $forall img <- imgs
-                        <img src=@{UploadsR (postImageFilePath img)} alt="#{postName post}" class="w-28 h-28 object-cover rounded-lg border transition hover:scale-[1.04]">
+                        <img src=@{UploadsByTextR (postImageFilePath img)} alt="#{postName post}" class="w-28 h-28 object-cover rounded-lg border transition hover:scale-[1.04]">
                 <p class="text-sm mb-2.5 leading-normal">#{postDescription post}
                 $maybe link <- postLink post
                   <a href="#{link}" target="_blank" rel="noopener" class="text-sm font-medium no-underline hover:underline underline-offset-2">Produkt link
@@ -97,9 +97,9 @@ getHomeR = do
                   <a href="#{video}" target="_blank" rel="noopener" class="text-sm font-medium no-underline hover:underline underline-offset-2">Video
                 $if loggedIn
                   <div class="flex items-center gap-3 mt-3.5 pt-3.5 border-t">
-                    <a href=@{PostEditR pid} class="text-sm font-medium no-underline transition-colors">Rediger
+                    <a href=@{PostByInt64EditR (fromSqlKey pid)} class="text-sm font-medium no-underline transition-colors">Rediger
                     <button class="text-sm font-medium font-[inherit] px-2 py-0.5 rounded border-0 cursor-pointer transition-colors bg-red-600 text-white"
-                      hx-post=@{PostDeleteR pid}
+                      hx-post=@{PostByInt64DeleteR (fromSqlKey pid)}
                       hx-confirm="Slett ønsket?">Slett
     |]
 

@@ -46,10 +46,11 @@ postPostNewR = do
   pid <- runDB $ Database.Persist.insert (post now uid)
   runDB $ mapM_ (\tid -> insert_ (PostTagLink tid pid)) tagIds
   handleImageUploads pid
-  redirect HomeR
+  redirect JwebHomeR
 
-getPostEditR :: PostId -> Handler Html
-getPostEditR pid = do
+getPostByInt64EditR :: Int64 -> Handler Html
+getPostByInt64EditR rawId = do
+  let pid = toSqlKey rawId :: PostId
   _ <- requireLogin
   post <- runDB (Database.Persist.get pid) >>= maybe notFound pure
   allTags <- runDB $ selectList [] []
@@ -62,8 +63,9 @@ getPostEditR pid = do
       ^{postForm (Just post) allTags selectedIds (Just pid)}
     |]
 
-postPostEditR :: PostId -> Handler Html
-postPostEditR pid = do
+postPostByInt64EditR :: Int64 -> Handler Html
+postPostByInt64EditR rawId = do
+  let pid = toSqlKey rawId :: PostId
   uid <- requireLogin
   now <- liftIO getCurrentTime
   (mkPost, tagIds) <- readPostForm
@@ -80,18 +82,19 @@ postPostEditR pid = do
         PostVideoUrl Database.Persist.=. postVideoUrl p
       ]
   handleImageUploads pid
-  redirect HomeR
+  redirect JwebHomeR
 
-postPostDeleteR :: PostId -> Handler Html
-postPostDeleteR pid = do
+postPostByInt64DeleteR :: Int64 -> Handler Html
+postPostByInt64DeleteR rawId = do
+  let pid = toSqlKey rawId :: PostId
   _ <- requireLogin
   now <- liftIO getCurrentTime
   runDB $ Database.Persist.update pid [PostDeletedAt Database.Persist.=. Just now]
   addHeader "HX-Redirect" "/"
   sendResponseStatus ok200 ("" :: Text)
 
-getUploadsR :: Text -> Handler TypedContent
-getUploadsR filename = do
+getUploadsByTextR :: Text -> Handler TypedContent
+getUploadsByTextR filename = do
   when (T.any (== '/') filename || T.isInfixOf ".." filename) notFound
   app <- getYesod
   let path = appUploadDir app </> T.unpack filename
@@ -112,7 +115,7 @@ postForm mPost allTags selectedIds mPid =
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="tags" value="#{tagKey}" :isSelected:checked>
             #{tagName}
-      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML">
         Rediger kategorier
     <label class="block text-sm font-semibold mb-1.5">Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">
@@ -132,7 +135,7 @@ postForm mPost allTags selectedIds mPid =
       <button type="submit" class="px-3 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer shadow-sm transition bg-green-600 text-white">Lagre
       $maybe pid <- mPid
         <button class="px-3 py-2 rounded-lg text-base font-semibold font-[inherit] border-0 cursor-pointer transition bg-red-600 text-white"
-          hx-post=@{PostDeleteR pid}
+          hx-post=@{PostByInt64DeleteR (fromSqlKey pid)}
           hx-confirm="Slett ønske?">Slett ønske
       <a href="/" class="text-sm font-medium no-underline text-red-600">Avbryt
 |]

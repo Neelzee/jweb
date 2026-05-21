@@ -1,11 +1,12 @@
 module Handler.Tag where
 
+import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import Data.Text (Text)
 import qualified Data.Text as T
 import Database.Persist (delete, deleteWhere, get, getBy, insertUnique, update, (=.), (==.))
-import Database.Persist.Sql (fromSqlKey)
+import Database.Persist.Sql (fromSqlKey, toSqlKey)
 import Foundation
 import Model
 import Network.HTTP.Types (ok200)
@@ -16,13 +17,13 @@ getTagNewR = do
   _ <- requireLogin
   renderFragment
     [hamlet|
-      <form class="flex items-center gap-2" hx-post=@{TagCreateR} hx-target="#tag-creator" hx-swap="innerHTML">
+      <form class="flex items-center gap-2" hx-post=@{TagR} hx-target="#tag-creator" hx-swap="innerHTML">
         <input type="text" name="tag" required placeholder="Ny kategori" class="px-2 py-1 border rounded text-sm font-[inherit]">
         <button type="submit" class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-green-600 text-white">Opprett
     |]
 
-postTagCreateR :: Handler Html
-postTagCreateR = do
+postTagR :: Handler Html
+postTagR = do
   _ <- requireLogin
   tagName <- runInputPost $ ireq textField "tag"
   let trimmed = T.strip tagName
@@ -44,19 +45,19 @@ postTagCreateR = do
               #{trimmed}
               <small>(0 innlegg)
               <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
-                hx-get=@{TagEditR tid}
+                hx-get=@{TagByInt64EditR (fromSqlKey tid)}
                 hx-target="#tag-#{fromSqlKey tid}"
                 hx-swap="outerHTML">Rediger
               <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
-                hx-post=@{TagDeleteR tid}
+                hx-post=@{TagByInt64DeleteR (fromSqlKey tid)}
                 hx-target="#tag-#{fromSqlKey tid}"
                 hx-swap="delete"
                 hx-confirm="Sletta «#{trimmed}»? Dette fjernar taggen frå alle innlegg.">
                 Slett
         |]
 
-getTagInlineR :: Handler Html
-getTagInlineR = do
+getTagsInlineR :: Handler Html
+getTagsInlineR = do
   _ <- requireLogin
   tags  <- runDB $ selectList [] [Asc PostTagTag]
   links <- runDB $ selectList [] []
@@ -70,11 +71,11 @@ getTagInlineR = do
             #{postTagTag tag}
             <small>(#{Map.findWithDefault 0 tid countMap} innlegg)
             <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
-              hx-get=@{TagEditR tid}
+              hx-get=@{TagByInt64EditR (fromSqlKey tid)}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">Rediger
             <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
-              hx-post=@{TagDeleteR tid}
+              hx-post=@{TagByInt64DeleteR (fromSqlKey tid)}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
               hx-confirm="Slette «#{postTagTag tag}»? Dette fjernar taggen frå alle innlegg.">
@@ -82,12 +83,12 @@ getTagInlineR = do
       <div id="tag-creator" class="flex items-center gap-2 mt-2">
         <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
           + Ny kategori
-      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagSelectR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsSelectR} hx-target="#tags-area" hx-swap="innerHTML">
         Tilbake
     |]
 
-getTagSelectR :: Handler Html
-getTagSelectR = do
+getTagsSelectR :: Handler Html
+getTagsSelectR = do
   _ <- requireLogin
   allTags <- runDB $ selectList [] [Asc PostTagTag]
   renderFragment
@@ -98,12 +99,12 @@ getTagSelectR = do
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="tags" value="#{fromSqlKey tid}">
             #{postTagTag tag}
-      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML">
         Rediger kategorier
     |]
 
-getTagListR :: Handler Html
-getTagListR = do
+getTagsR :: Handler Html
+getTagsR = do
   _ <- requireLogin
   tags  <- runDB $ selectList [] [Asc PostTagTag]
   links <- runDB $ selectList [] []
@@ -119,39 +120,39 @@ getTagListR = do
             #{postTagTag tag}
             <small>(#{Map.findWithDefault 0 tid countMap} innlegg)
             <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
-              hx-get=@{TagEditR tid}
+              hx-get=@{TagByInt64EditR (fromSqlKey tid)}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="outerHTML">Rediger
             <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
-              hx-post=@{TagDeleteR tid}
+              hx-post=@{TagByInt64DeleteR (fromSqlKey tid)}
               hx-target="#tag-#{fromSqlKey tid}"
               hx-swap="delete"
               hx-confirm="Sletta «#{postTagTag tag}»? Dette fjernar taggen frå alle innlegg.">
               Slett
     |]
 
--- Inline edit form for a single row
-
-getTagEditR :: PostTagId -> Handler Html
-getTagEditR tid = do
+getTagByInt64EditR :: Int64 -> Handler Html
+getTagByInt64EditR rawId = do
+  let tid = toSqlKey rawId :: PostTagId
   _ <- requireLogin
   tag <- runDB (get tid) >>= maybe notFound pure
   renderFragment
     [hamlet|
-      <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
-        <form class="flex items-center gap-2" hx-post=@{TagEditR tid}
-              hx-target="#tag-#{fromSqlKey tid}"
+      <li id="tag-#{rawId}" class="flex items-center gap-3 text-sm">
+        <form class="flex items-center gap-2" hx-post=@{TagByInt64EditR rawId}
+              hx-target="#tag-#{rawId}"
               hx-swap="outerHTML">
           <input type="text" name="tag" value="#{postTagTag tag}" required class="px-2 py-1 border rounded text-sm font-[inherit]">
           <button type="submit" class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-green-600 text-white">Lagre
           <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit] text-red-600"
-            hx-get=@{TagRowR tid}
-            hx-target="#tag-#{fromSqlKey tid}"
+            hx-get=@{TagByInt64RowR rawId}
+            hx-target="#tag-#{rawId}"
             hx-swap="outerHTML">Avbryt
     |]
 
-postTagEditR :: PostTagId -> Handler Html
-postTagEditR tid = do
+postTagByInt64EditR :: Int64 -> Handler Html
+postTagByInt64EditR rawId = do
+  let tid = toSqlKey rawId :: PostTagId
   _ <- requireLogin
   newName <- runInputPost $ ireq textField "tag"
   let trimmed = T.strip newName
@@ -161,18 +162,20 @@ postTagEditR tid = do
       invalidArgs ["En kategori med dette navnet finnes allerede"]
     _ -> do
       runDB $ update tid [PostTagTag =. trimmed]
-      count <- runDB $ length <$> selectList [PostTagLinkTagId ==. tid] []
-      renderTagRow tid trimmed count
+      n <- runDB $ length <$> selectList [PostTagLinkTagId ==. tid] []
+      renderTagRow tid trimmed n
 
-getTagRowR :: PostTagId -> Handler Html
-getTagRowR tid = do
+getTagByInt64RowR :: Int64 -> Handler Html
+getTagByInt64RowR rawId = do
+  let tid = toSqlKey rawId :: PostTagId
   _ <- requireLogin
-  tag   <- runDB (get tid) >>= maybe notFound pure
-  count <- runDB $ length <$> selectList [PostTagLinkTagId ==. tid] []
-  renderTagRow tid (postTagTag tag) count
+  tag <- runDB (get tid) >>= maybe notFound pure
+  n   <- runDB $ length <$> selectList [PostTagLinkTagId ==. tid] []
+  renderTagRow tid (postTagTag tag) n
 
-postTagDeleteR :: PostTagId -> Handler Html
-postTagDeleteR tid = do
+postTagByInt64DeleteR :: Int64 -> Handler Html
+postTagByInt64DeleteR rawId = do
+  let tid = toSqlKey rawId :: PostTagId
   _ <- requireLogin
   runDB $ do
     deleteWhere [PostTagLinkTagId ==. tid]
@@ -180,18 +183,18 @@ postTagDeleteR tid = do
   sendResponseStatus ok200 ("" :: Text)
 
 renderTagRow :: PostTagId -> Text -> Int -> Handler Html
-renderTagRow tid name count =
+renderTagRow tid name n =
   renderFragment
     [hamlet|
       <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
         #{name}
-        <small>(#{count} innlegg)
+        <small>(#{n} innlegg)
         <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
-          hx-get=@{TagEditR tid}
+          hx-get=@{TagByInt64EditR (fromSqlKey tid)}
           hx-target="#tag-#{fromSqlKey tid}"
           hx-swap="outerHTML">Rediger
         <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
-          hx-post=@{TagDeleteR tid}
+          hx-post=@{TagByInt64DeleteR (fromSqlKey tid)}
           hx-target="#tag-#{fromSqlKey tid}"
           hx-swap="delete"
           hx-confirm="Sletta «#{name}»? Dette fjernar taggen frå alle innlegg.">
