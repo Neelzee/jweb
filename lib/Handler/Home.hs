@@ -89,7 +89,8 @@ getJwebHomeR = do
                   $if not (null imgs)
                     <div class="flex flex-wrap gap-2 mb-4">
                       $forall img <- imgs
-                        <img src=@{UploadsByTextR (postImageFilePath img)} alt="#{postName post}" class="w-28 h-28 object-cover rounded-lg border transition hover:scale-[1.04]">
+                        <a href=@{UploadsByTextR (postImageFilePath img)}>
+                          <img src=@{UploadsByTextR (postImageFilePath img)} alt="#{postName post}" class="w-28 h-28 object-cover rounded-lg border transition hover:scale-[1.04]">
                 <p class="text-sm mb-2.5 leading-normal">#{postDescription post}
                 $maybe link <- postLink post
                   <a href="#{link}" target="_blank" rel="noopener" class="text-sm font-medium no-underline hover:underline underline-offset-2">Produkt link
