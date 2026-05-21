@@ -22,10 +22,8 @@ jobs:
         run: nix build .#docker --accept-flake-config
 
       - name: Push to GHCR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           nix develop --command skopeo copy \
-            --dest-creds "${{ github.actor }}:$GITHUB_TOKEN" \
-            "docker-archive:result" \
-            "docker://ghcr.io/neelzee/jweb:latest"
+            --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
+            docker-archive:result \
+            docker://ghcr.io/neelzee/jweb:latest
