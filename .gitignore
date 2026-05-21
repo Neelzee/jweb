@@ -10,3 +10,6 @@ static
 output
 .spago
 generated
+node_modules
+ts-out
+*.js

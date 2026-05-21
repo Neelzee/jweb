@@ -109,6 +109,8 @@
               inherit (pkgs) skopeo;
               inherit (pkgs) openapi-generator-cli;
               inherit (pkgs) just;
+              inherit (pkgs) nodejs;
+              inherit (pkgs) typescript;
             };
 
             mkShellArgs = {
@@ -116,9 +118,13 @@
                 zlib
                 glibc
                 clib
+                nodejs
+                playwright-driver.browsers
               ];
               shellHook = ''
                 export LD_LIBRARY_PATH=${lib.makeLibraryPath [pkgs.zlib]}
+                export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+                export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
               '';
             };
 

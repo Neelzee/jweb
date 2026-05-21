@@ -1,0 +1,12 @@
+{
+  "name": "jweb",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "playwright": "1.59.1",
+    "typescript": "^5.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1"
+  }
+}

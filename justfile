@@ -11,4 +11,10 @@ hs:
   cp generated/config/routes.yesodroutes config/
   cp specification/specification.yaml static/
 
+ts:
+  npx tsc
+
+test: ts
+  spago test
+
 all: css js hs

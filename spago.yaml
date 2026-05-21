@@ -8,6 +8,13 @@ package:
     - web-dom
     - web-events
     - web-html
+  test:
+    main: Test.Main
+    dependencies:
+      - aff
+      - console
+      - either
+      - exceptions
   build:
     pedanticPackages: true
     strict: true
