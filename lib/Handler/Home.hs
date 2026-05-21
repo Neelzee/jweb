@@ -76,7 +76,7 @@ getJwebHomeR = do
             <a href=@{PostNewR} class="sm:hidden fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full flex items-center justify-center text-2xl font-bold no-underline shadow-lg bg-green-600 text-white">+
           <ul id="posts" class="list-none flex flex-col gap-3">
             $forall Entity pid post <- posts
-              <li class="rounded-xl border p-5 shadow-sm transition">
+              <li class="max-w-[52rem] rounded-xl border p-5 shadow-sm transition">
                 <div class="flex items-center gap-2 mb-2">
                   <strong>#{postName post}
                   <span class="status-#{statusVal (postStatus post)} text-xs font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border">#{statusLabel (postStatus post)}

@@ -34,7 +34,7 @@ getPostNewR = do
   defaultLayout $ do
     setTitle "Nytt ønske"
     [whamlet|
-      <h1 class="text-xl font-bold tracking-tight mb-6">New post
+      <h1 class="text-xl font-bold tracking-tight mb-6">Nytt ønske
       ^{postForm Nothing allTags [] Nothing}
     |]
 
@@ -107,7 +107,7 @@ getUploadsByTextR filename = do
 postForm :: Maybe Post -> [Entity PostTag] -> [PostTagId] -> Maybe PostId -> Widget
 postForm mPost allTags selectedIds mPid =
   [whamlet|
-  <form class="flex flex-col gap-4 max-w-lg" method="post" enctype="multipart/form-data">
+  <form class="flex flex-col gap-4 max-w-lg mx-auto" method="post" enctype="multipart/form-data">
     <div id="tags-area" class="flex flex-col gap-2">
       <label class="block text-sm font-semibold mb-1.5">Kategori
       <div id="tags-select" class="flex flex-col gap-1">

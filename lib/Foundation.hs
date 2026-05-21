@@ -67,7 +67,7 @@ instance Yesod App where
                     $maybe token <- mToken
                       <input type="hidden" name="_token" value="#{token}">
                     <button type="submit" class="block w-full px-4 py-2.5 text-sm text-left font-medium font-[inherit] bg-transparent border-0 cursor-pointer">Logg ut
-          <main class="max-w-[52rem] mx-auto mt-6 sm:mt-10 px-4 sm:px-6">
+          <main class="max-w-7xl mx-auto mt-6 sm:mt-10 px-4 sm:px-6">
             ^{pageBody pc}
     |]
 
