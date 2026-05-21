@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/Neelzee/jweb/compare/v1.0.0...v1.0.1) (2026-05-21)
+
+
+### Bug Fixes
+
+* only run test on code change ([061ef9d](https://github.com/Neelzee/jweb/commit/061ef9d678f68ae90dd04cfb6307cc41926a37c6))
+
 ## 1.0.0 (2026-05-21)
 
 
