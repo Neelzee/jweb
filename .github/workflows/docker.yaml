@@ -21,9 +21,15 @@ jobs:
       - name: Build Docker image
         run: nix build .#docker --accept-flake-config
 
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Push to GHCR
         run: |
           nix develop --accept-flake-config --command skopeo copy \
-            --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
             docker-archive:result \
             docker://ghcr.io/neelzee/jweb:latest
