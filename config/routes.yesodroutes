@@ -21,4 +21,5 @@
 /tag/#Int64/edit TagByInt64EditR GET POST
 /tag/#Int64/delete TagByInt64DeleteR POST
 /tag/#Int64/row TagByInt64RowR GET
+/docs DocsR GET
 /version VersionR GET

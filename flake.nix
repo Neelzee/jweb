@@ -30,6 +30,7 @@
           cp -r ${./lib}/. lib/
           cp ${./static/input.css} static/input.css
           cp ${./tailwind.config.js} tailwind.config.js
+
           tailwindcss -i static/input.css -o $out/style.css --minify
         '';
         jweb-js = psPkgs.stdenv.mkDerivation {
@@ -57,6 +58,7 @@
             cp static/main.js $out/main.js
           '';
         };
+        staticDir = "$out/share/jweb/static";
       in
       {
 
@@ -83,9 +85,10 @@
               custom = drv: drv.overrideAttrs (old: {
                 postInstall = (old.postInstall or "") + ''
                   mkdir -p $out/share/jweb
-                  cp -r --no-preserve=mode ${./static} $out/share/jweb/static
-                  cp ${tailwindCSS}/style.css $out/share/jweb/static/style.css
-                  cp ${jweb-js}/main.js $out/share/jweb/static/main.js
+                  cp -r --no-preserve=mode ${./static} ${staticDir}
+                  cp ${tailwindCSS}/style.css ${staticDir}/style.css
+                  cp ${jweb-js}/main.js ${staticDir}/main.js
+                  cp ${./specification/specification.yaml} ${staticDir}/specification.yaml
                 '';
               });
             };
@@ -133,7 +136,7 @@
         packages.docker =
           let
             envVersion = builtins.getEnv "JWEB_VERSION";
-            version = if envVersion != "" then envVersion else "0.0.0";
+            version = if envVersion != "" then envVersion else "0.0.0.0";
           in
           pkgs.dockerTools.buildLayeredImage {
             name = "jweb";

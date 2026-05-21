@@ -7,7 +7,8 @@ js:
 hs:
   openapi-generator-cli generate -g haskell-yesod -i specification/specification.yaml -o generated/
   mkdir -p lib/Jweb config
-  cp generated/src/Jweb/Types.hs lib/Jweb/Types.hs
-  cp generated/config/routes.yesodroutes config/routes.yesodroutes
+  cp generated/src/Jweb/Types.hs lib/Jweb/
+  cp generated/config/routes.yesodroutes config/
+  cp specification/specification.yaml static/
 
 all: css js hs

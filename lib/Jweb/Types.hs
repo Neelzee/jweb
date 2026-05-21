@@ -25,7 +25,7 @@ import GHC.Generics (Generic)
 
 -- | 
 data AppStatus = AppStatus
-  { appStatusVersion :: Text -- ^ Semantic version (e.g. \"1.2.3\")
+  { appStatusVersion :: Text -- ^ PVP version (e.g. \"0.1.0.0\")
   , appStatusStartedAt :: UTCTime -- ^ 
   , appStatusUptimeSeconds :: Int64 -- ^ 
   } deriving (Show, Eq, Generic)

@@ -33,6 +33,7 @@ library
     , Application
     , Model
     , Whitelist
+    , Handler.Docs
     , Handler.Home
     , Handler.Auth
     , Handler.Post

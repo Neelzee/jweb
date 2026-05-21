@@ -519,6 +519,23 @@ paths:
         '404':
           description: Not found
 
+  /docs:
+    get:
+      operationId: getDocsR
+      tags: [system]
+      summary: Swagger UI – interactive API documentation
+      responses:
+        '200':
+          description: Swagger UI page
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                spec:
+                  summary: The OpenAPI specification
+                  externalValue: '/static/specification.yaml'
+
   /version:
     get:
       operationId: getVersionR
