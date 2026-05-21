@@ -1,0 +1,550 @@
+openapi: "3.0.3"
+
+info:
+  title: jweb
+  version: "1.0.0"
+  description: Ønskeliste – Yesod HTMX web app
+
+servers:
+  - url: /
+
+tags:
+  - name: auth
+  - name: posts
+  - name: tags
+  - name: uploads
+  - name: system
+
+components:
+
+  schemas:
+
+    AppStatus:
+      type: object
+      required: [version, startedAt, uptimeSeconds]
+      properties:
+        version:
+          type: string
+          description: PVP version (e.g. "0.1.0.0")
+          pattern: '^\d+\.\d+\.\d+\.\d+$'
+        startedAt:
+          type: string
+          format: date-time
+        uptimeSeconds:
+          type: integer
+          format: int64
+
+    PostStatus:
+      type: string
+      enum: [wanted, ordered, bought]
+
+    Post:
+      type: object
+      required: [id, name, description, status, tags, imageUrls, createdAt]
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/PostStatus'
+        tags:
+          type: array
+          items:
+            type: string
+        imageUrls:
+          type: array
+          items:
+            type: string
+        link:
+          type: string
+          nullable: true
+        videoUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    Tag:
+      type: object
+      required: [id, tag, postCount]
+      properties:
+        id:
+          type: integer
+          format: int64
+        tag:
+          type: string
+        postCount:
+          type: integer
+
+    User:
+      type: object
+      required: [id, email, name]
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+
+    PostForm:
+      type: object
+      required: [name, status]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/PostStatus'
+        link:
+          type: string
+          nullable: true
+        videoUrl:
+          type: string
+          nullable: true
+        tags:
+          type: array
+          items:
+            type: integer
+            format: int64
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
+
+    TagForm:
+      type: object
+      required: [tag]
+      properties:
+        tag:
+          type: string
+          minLength: 1
+
+    LoginForm:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+        step:
+          type: string
+          enum: [login, setup]
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        confirm:
+          type: string
+          nullable: true
+
+paths:
+
+  /:
+    get:
+      operationId: getHomeR
+      tags: [posts]
+      summary: Home page – list active posts
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/PostStatus'
+        - name: tag
+          in: query
+          required: false
+          description: Filter by tag ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Post list page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /auth/login:
+    get:
+      operationId: getAuthLoginR
+      tags: [auth]
+      summary: Login page
+      responses:
+        '200':
+          description: Login form page
+          content:
+            text/html:
+              schema:
+                type: string
+
+    post:
+      operationId: postAuthLoginR
+      tags: [auth]
+      summary: Multi-step login (email → password or first-time setup)
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginForm'
+      responses:
+        '200':
+          description: Next step fragment or redirect header on success
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /auth/logout:
+    post:
+      operationId: postAuthLogoutR
+      tags: [auth]
+      summary: Log out and redirect to home
+      responses:
+        '303':
+          description: Redirect to home
+
+  /post/new:
+    get:
+      operationId: getPostNewR
+      tags: [posts]
+      summary: New post form page
+      responses:
+        '200':
+          description: New post form
+          content:
+            text/html:
+              schema:
+                type: string
+
+    post:
+      operationId: postPostNewR
+      tags: [posts]
+      summary: Create a post
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostForm'
+      responses:
+        '303':
+          description: Redirect to home
+
+  /post/{id}/edit:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    get:
+      operationId: getPostEditR
+      tags: [posts]
+      summary: Edit post form page
+      responses:
+        '200':
+          description: Edit form page
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Not found
+
+    post:
+      operationId: postPostEditR
+      tags: [posts]
+      summary: Update a post
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PostForm'
+      responses:
+        '303':
+          description: Redirect to home
+        '404':
+          description: Not found
+
+  /post/{id}/delete:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    post:
+      operationId: postPostDeleteR
+      tags: [posts]
+      summary: Soft-delete a post (moves to trash)
+      responses:
+        '200':
+          description: Empty body with HX-Redirect header
+
+  /post/{id}/restore:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    post:
+      operationId: postPostRestoreR
+      tags: [posts]
+      summary: Restore a soft-deleted post from trash
+      responses:
+        '303':
+          description: Redirect
+
+  /trash:
+    get:
+      operationId: getTrashR
+      tags: [posts]
+      summary: Trash page – list soft-deleted posts
+      responses:
+        '200':
+          description: Trash page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /static/{filename}:
+    parameters:
+      - name: filename
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: getStaticByTextR
+      tags: [uploads]
+      summary: Serve a static asset (CSS, JS, icons, etc.)
+      responses:
+        '200':
+          description: File content
+        '404':
+          description: Not found
+
+  /uploads/{filename}:
+    parameters:
+      - name: filename
+        in: path
+        required: true
+        schema:
+          type: string
+
+    get:
+      operationId: getUploadsR
+      tags: [uploads]
+      summary: Serve an uploaded file
+      responses:
+        '200':
+          description: File content
+        '404':
+          description: Not found
+
+  /tags:
+    get:
+      operationId: getTagListR
+      tags: [tags]
+      summary: Tag management page
+      responses:
+        '200':
+          description: Tag list page
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /tags/inline:
+    get:
+      operationId: getTagInlineR
+      tags: [tags]
+      summary: HTMX inline tag editor fragment
+      responses:
+        '200':
+          description: Tag editor fragment
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /tags/select:
+    get:
+      operationId: getTagSelectR
+      tags: [tags]
+      summary: HTMX tag selector fragment (used in post form)
+      responses:
+        '200':
+          description: Tag selector fragment
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /tag/new:
+    get:
+      operationId: getTagNewR
+      tags: [tags]
+      summary: HTMX new tag form fragment
+      responses:
+        '200':
+          description: New tag form fragment
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /tag:
+    post:
+      operationId: postTagCreateR
+      tags: [tags]
+      summary: Create a tag
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagForm'
+      responses:
+        '200':
+          description: Updated fragment with new tag row and creator reset
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /tag/{id}/edit:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    get:
+      operationId: getTagEditR
+      tags: [tags]
+      summary: HTMX tag edit row fragment
+      responses:
+        '200':
+          description: Edit form row
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Not found
+
+    post:
+      operationId: postTagEditR
+      tags: [tags]
+      summary: Rename a tag
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagForm'
+      responses:
+        '200':
+          description: Updated tag row
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Not found
+
+  /tag/{id}/delete:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    post:
+      operationId: postTagDeleteR
+      tags: [tags]
+      summary: Delete a tag and remove it from all posts
+      responses:
+        '200':
+          description: Empty body
+
+  /tag/{id}/row:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+
+    get:
+      operationId: getTagRowR
+      tags: [tags]
+      summary: HTMX tag row fragment (read-only)
+      responses:
+        '200':
+          description: Tag row
+          content:
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Not found
+
+  /docs:
+    get:
+      operationId: getDocsR
+      tags: [system]
+      summary: Swagger UI – interactive API documentation
+      responses:
+        '200':
+          description: Swagger UI page
+          content:
+            text/html:
+              schema:
+                type: string
+              examples:
+                spec:
+                  summary: The OpenAPI specification
+                  externalValue: '/static/specification.yaml'
+
+  /version:
+    get:
+      operationId: getVersionR
+      tags: [system]
+      summary: App version, start time, and uptime
+      responses:
+        '200':
+          description: Current app status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppStatus'

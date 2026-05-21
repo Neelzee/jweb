@@ -8,8 +8,8 @@ import System.Directory (doesFileExist)
 import System.FilePath (takeExtension, (</>))
 import Yesod
 
-getStaticR :: Text -> Handler TypedContent
-getStaticR filename = do
+getStaticByTextR :: Text -> Handler TypedContent
+getStaticByTextR filename = do
   when (T.any (== '/') filename || T.isInfixOf ".." filename) notFound
   app <- getYesod
   let path = appStaticDir app </> T.unpack filename

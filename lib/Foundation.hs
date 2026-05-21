@@ -1,7 +1,9 @@
 module Foundation where
 
+import Data.Int (Int64)
 import Data.Maybe (isJust)
 import Data.Text (Text)
+import Data.Time (UTCTime)
 import Database.Persist.Sqlite (ConnectionPool, SqlBackend, runSqlPool)
 import Model
 import Yesod
@@ -10,31 +12,12 @@ data App = App
   { appConnectionPool :: ConnectionPool,
     appUploadDir :: FilePath,
     appSessionKeyPath :: FilePath,
-    appStaticDir :: FilePath
+    appStaticDir :: FilePath,
+    appStartedAt :: UTCTime,
+    appVersion :: Text
   }
 
-mkYesodData
-  "App"
-  [parseRoutes|
-/                     HomeR        GET
-/auth/login           AuthLoginR   GET POST
-/auth/logout          AuthLogoutR  POST
-/post/new             PostNewR     GET POST
-/post/#PostId/edit    PostEditR    GET POST
-/post/#PostId/delete  PostDeleteR  POST
-/uploads/#Text        UploadsR     GET
-/static/#Text         StaticR      GET
-/trash                TrashR       GET
-/post/#PostId/restore PostRestoreR POST
-/tag/new               TagNewR     GET
-/tag                   TagCreateR  POST
-/tags                  TagListR    GET
-/tags/inline           TagInlineR  GET
-/tags/select           TagSelectR  GET
-/tag/#PostTagId/edit   TagEditR    GET POST
-/tag/#PostTagId/delete TagDeleteR  POST
-/tag/#PostTagId/row    TagRowR     GET
-|]
+mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")
 
 instance Yesod App where
   makeSessionBackend app =
@@ -57,9 +40,9 @@ instance Yesod App where
           $maybe token <- mToken
             <meta name="csrf-token" content="#{token}">
           <title>#{pageTitle pc}
-          <link rel="stylesheet" href=@{StaticR "output.css"}>
+          <link rel="stylesheet" href=@{StaticByTextR "output.css"}>
           <script src="https://unpkg.com/htmx.org@2.0.4" defer>
-          <script src=@{StaticR "main.js"} defer>
+          <script src=@{StaticByTextR "main.js"} defer>
           <script>
             document.addEventListener('DOMContentLoaded', function () {
               document.addEventListener('htmx:configRequest', function (e) {
@@ -70,7 +53,7 @@ instance Yesod App where
           ^{pageHead pc}
         <body>
           <header class="sticky top-0 z-10 flex items-center justify-between px-4 sm:px-8 h-14 border-b shadow-sm bg-white">
-            <a href=@{HomeR} class="text-base font-bold no-underline tracking-tight">Ønskeliste</a>
+            <a href=@{JwebHomeR} class="text-base font-bold no-underline tracking-tight">Ønskeliste</a>
             $if loggedIn
               <form method="post" action=@{AuthLogoutR} class="hidden sm:flex items-center">
                 $maybe token <- mToken
@@ -84,7 +67,7 @@ instance Yesod App where
                     $maybe token <- mToken
                       <input type="hidden" name="_token" value="#{token}">
                     <button type="submit" class="block w-full px-4 py-2.5 text-sm text-left font-medium font-[inherit] bg-transparent border-0 cursor-pointer">Logg ut
-          <main class="max-w-[52rem] mx-auto mt-6 sm:mt-10 px-4 sm:px-6">
+          <main class="max-w-7xl mx-auto mt-6 sm:mt-10 px-4 sm:px-6">
             ^{pageBody pc}
     |]
 

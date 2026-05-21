@@ -6,7 +6,10 @@ dist-newstyle
 upload
 .session.aes
 result
-static/style.css
-static/main.js
+static
 output
 .spago
+generated
+node_modules
+ts-out
+*.js

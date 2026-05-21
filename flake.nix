@@ -30,11 +30,15 @@
           cp -r ${./lib}/. lib/
           cp ${./static/input.css} static/input.css
           cp ${./tailwind.config.js} tailwind.config.js
+
           tailwindcss -i static/input.css -o $out/style.css --minify
         '';
         jweb-js = psPkgs.stdenv.mkDerivation {
           name = "jweb-js";
-          src = ./.;
+          src = lib.cleanSourceWith {
+            filter = path: _type: !(lib.hasPrefix (toString ./test) path);
+            src = ./.;
+          };
           nativeBuildInputs =
           [
             psPkgs.purs
@@ -57,6 +61,7 @@
             cp static/main.js $out/main.js
           '';
         };
+        staticDir = "$out/share/jweb/static";
       in
       {
 
@@ -83,9 +88,10 @@
               custom = drv: drv.overrideAttrs (old: {
                 postInstall = (old.postInstall or "") + ''
                   mkdir -p $out/share/jweb
-                  cp -r --no-preserve=mode ${./static} $out/share/jweb/static
-                  cp ${tailwindCSS}/style.css $out/share/jweb/static/style.css
-                  cp ${jweb-js}/main.js $out/share/jweb/static/main.js
+                  cp -r --no-preserve=mode ${./static} ${staticDir}
+                  cp ${tailwindCSS}/style.css ${staticDir}/style.css
+                  cp ${jweb-js}/main.js ${staticDir}/main.js
+                  cp ${./specification/specification.yaml} ${staticDir}/specification.yaml
                 '';
               });
             };
@@ -104,6 +110,10 @@
               inherit (pkgs) esbuild;
               inherit (psPkgs) purs spago-unstable;
               inherit (pkgs) skopeo;
+              inherit (pkgs) openapi-generator-cli;
+              inherit (pkgs) just;
+              inherit (pkgs) nodejs;
+              inherit (pkgs) typescript;
             };
 
             mkShellArgs = {
@@ -111,9 +121,13 @@
                 zlib
                 glibc
                 clib
+                nodejs
+                playwright-driver.browsers
               ];
               shellHook = ''
                 export LD_LIBRARY_PATH=${lib.makeLibraryPath [pkgs.zlib]}
+                export PLAYWRIGHT_BROWSERS_PATH=${pkgs.playwright-driver.browsers}
+                export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
               '';
             };
 
@@ -128,24 +142,30 @@
 
         packages.jweb-js = jweb-js;
 
-        packages.docker = pkgs.dockerTools.buildLayeredImage {
-          name = "jweb";
-          tag = "latest";
+        packages.docker =
+          let
+            envVersion = builtins.getEnv "JWEB_VERSION";
+            version = if envVersion != "" then envVersion else "0.0.0.0";
+          in
+          pkgs.dockerTools.buildLayeredImage {
+            name = "jweb";
+            tag = "latest";
 
-          contents = [
-            self'.packages.jweb
-            pkgs.cacert
-          ];
-
-          config = {
-            Cmd = [ "${self'.packages.jweb}/bin/jweb" ];
-            ExposedPorts."3000/tcp" = {};
-            WorkingDir = "/data";
-            Env = [
-              "JWEB_STATIC_DIR=${self'.packages.jweb}/share/jweb/static"
+            contents = [
+              self'.packages.jweb
+              pkgs.cacert
             ];
+
+            config = {
+              Cmd = [ "${self'.packages.jweb}/bin/jweb" ];
+              ExposedPorts."3000/tcp" = {};
+              WorkingDir = "/data";
+              Env = [
+                "JWEB_STATIC_DIR=${self'.packages.jweb}/share/jweb/static"
+                "JWEB_VERSION=${version}"
+              ];
+            };
           };
-        };
       };
     };
 }

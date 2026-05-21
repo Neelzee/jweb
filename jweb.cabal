@@ -2,6 +2,7 @@ cabal-version:      2.4
 name:               jweb
 version:            0.1.0.0
 build-type:         Simple
+extra-source-files: config/routes.yesodroutes
 
 common shared
   default-language:    Haskell2010
@@ -33,12 +34,14 @@ library
     , Application
     , Model
     , Whitelist
+    , Handler.Docs
     , Handler.Home
     , Handler.Auth
     , Handler.Post
     , Handler.Static
     , Handler.Trash
     , Handler.Tag
+    , Handler.Version
   build-depends:
       base              >= 4.13 && < 5
     , yesod             >= 1.6

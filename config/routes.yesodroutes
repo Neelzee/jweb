@@ -1,0 +1,25 @@
+-- By default this file is used by `parseRoutesFile` in Foundation.hs
+-- Syntax for this file here: https://www.yesodweb.com/book/routing-and-handlers
+
+-- /static StaticR Static appStatic
+
+/ JwebHomeR GET
+/auth/login AuthLoginR GET POST
+/auth/logout AuthLogoutR POST
+/post/new PostNewR GET POST
+/post/#Int64/edit PostByInt64EditR GET POST
+/post/#Int64/delete PostByInt64DeleteR POST
+/post/#Int64/restore PostByInt64RestoreR POST
+/trash TrashR GET
+/static/#Text StaticByTextR GET
+/uploads/#Text UploadsByTextR GET
+/tags TagsR GET
+/tags/inline TagsInlineR GET
+/tags/select TagsSelectR GET
+/tag/new TagNewR GET
+/tag TagR POST
+/tag/#Int64/edit TagByInt64EditR GET POST
+/tag/#Int64/delete TagByInt64DeleteR POST
+/tag/#Int64/row TagByInt64RowR GET
+/docs DocsR GET
+/version VersionR GET

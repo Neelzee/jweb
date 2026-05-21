@@ -659,6 +659,10 @@ video {
   display: flex;
 }
 
+.table {
+  display: table;
+}
+
 .contents {
   display: contents;
 }
@@ -701,6 +705,10 @@ video {
 
 .min-w-0 {
   min-width: 0px;
+}
+
+.max-w-7xl {
+  max-width: 80rem;
 }
 
 .max-w-\[52rem\] {
