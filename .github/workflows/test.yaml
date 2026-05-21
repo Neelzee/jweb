@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Install npm dependencies
+        run: nix develop --accept-flake-config --command npm install
+
+      - name: Build app
+        run: nix build .#default --accept-flake-config
+
+      - name: Start app
+        run: |
+          mkdir -p /tmp/jweb-uploads
+          JWEB_DB_PATH=/tmp/test.db \
+          JWEB_SESSION_KEY=/tmp/session.aes \
+          JWEB_UPLOAD_DIR=/tmp/jweb-uploads \
+          JWEB_STATIC_DIR=./static \
+          JWEB_PORT=3000 \
+          ./result/bin/jweb &
+          echo $! > /tmp/jweb.pid
+
+      - name: Wait for app
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000 && break || sleep 1
+          done
+
+      - name: Run tests
+        run: nix develop --accept-flake-config --command just test
+
+      - name: Stop app
+        if: always()
+        run: kill $(cat /tmp/jweb.pid) 2>/dev/null || true
