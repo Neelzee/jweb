@@ -27,5 +27,5 @@ jobs:
         run: |
           nix develop --command skopeo copy \
             --dest-creds "${{ github.actor }}:$GITHUB_TOKEN" \
-            "docker-archive:$(readlink result)" \
-            "docker://ghcr.io/${{ github.repository }}:latest"
+            "docker-archive:result" \
+            "docker://ghcr.io/neelzee/jweb:latest"
