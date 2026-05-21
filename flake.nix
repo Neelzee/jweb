@@ -145,7 +145,7 @@
         packages.docker =
           let
             envVersion = builtins.getEnv "JWEB_VERSION";
-            version = if envVersion != "" then envVersion else "0.0.0.0";
+            version = if envVersion != "" then envVersion else "0.0.0";
           in
           pkgs.dockerTools.buildLayeredImage {
             name = "jweb";
