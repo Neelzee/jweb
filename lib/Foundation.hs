@@ -26,6 +26,14 @@ mkYesodData
 /static/#Text         StaticR      GET
 /trash                TrashR       GET
 /post/#PostId/restore PostRestoreR POST
+/tag/new               TagNewR     GET
+/tag                   TagCreateR  POST
+/tags                  TagListR    GET
+/tags/inline           TagInlineR  GET
+/tags/select           TagSelectR  GET
+/tag/#PostTagId/edit   TagEditR    GET POST
+/tag/#PostTagId/delete TagDeleteR  POST
+/tag/#PostTagId/row    TagRowR     GET
 |]
 
 instance Yesod App where
@@ -49,8 +57,9 @@ instance Yesod App where
           $maybe token <- mToken
             <meta name="csrf-token" content="#{token}">
           <title>#{pageTitle pc}
-          <link rel="stylesheet" href=@{StaticR "style.css"}>
+          <link rel="stylesheet" href=@{StaticR "output.css"}>
           <script src="https://unpkg.com/htmx.org@2.0.4" defer>
+          <script src=@{StaticR "main.js"} defer>
           <script>
             document.addEventListener('DOMContentLoaded', function () {
               document.addEventListener('htmx:configRequest', function (e) {
@@ -60,14 +69,22 @@ instance Yesod App where
             });
           ^{pageHead pc}
         <body>
-          <header>
-            <a href=@{HomeR}>Ønskeliste</a>
+          <header class="sticky top-0 z-10 flex items-center justify-between px-4 sm:px-8 h-14 border-b shadow-sm bg-white">
+            <a href=@{HomeR} class="text-base font-bold no-underline tracking-tight">Ønskeliste</a>
             $if loggedIn
-              <form method="post" action=@{AuthLogoutR}>
+              <form method="post" action=@{AuthLogoutR} class="hidden sm:flex items-center">
                 $maybe token <- mToken
                   <input type="hidden" name="_token" value="#{token}">
-                <button class="log-out" type="submit">Logg ut
-          <main>
+                <button type="submit" class="rounded border px-3.5 py-1.5 text-sm font-medium font-[inherit] cursor-pointer transition-colors">Logg ut
+              <div class="sm:hidden relative" data-menu-wrapper>
+                <button type="button" onclick="var m=document.getElementById('mobile-menu');m.classList.toggle('hidden')" class="rounded border px-3 py-1.5 text-sm cursor-pointer font-[inherit]">&#9776;
+                <div id="mobile-menu" class="hidden absolute right-0 top-10 border rounded-lg shadow-lg z-50 w-36 bg-white">
+                  <a href=@{TrashR} class="block px-4 py-2.5 text-sm font-medium no-underline">Papirkurv
+                  <form method="post" action=@{AuthLogoutR}>
+                    $maybe token <- mToken
+                      <input type="hidden" name="_token" value="#{token}">
+                    <button type="submit" class="block w-full px-4 py-2.5 text-sm text-left font-medium font-[inherit] bg-transparent border-0 cursor-pointer">Logg ut
+          <main class="max-w-[52rem] mx-auto mt-6 sm:mt-10 px-4 sm:px-6">
             ^{pageBody pc}
     |]
 
