@@ -103,6 +103,7 @@
               inherit (pkgs) tailwindcss;
               inherit (pkgs) esbuild;
               inherit (psPkgs) purs spago-unstable;
+              inherit (pkgs) skopeo;
             };
 
             mkShellArgs = {
