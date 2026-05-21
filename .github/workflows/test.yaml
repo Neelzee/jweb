@@ -3,6 +3,13 @@ name: Test
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'app/**'
+      - 'lib/**'
+      - 'src/**'
+      - 'test/**'
+      - 'flake.nix'
+      - 'flake.lock'
 
 jobs:
   test:
