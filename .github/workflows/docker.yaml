@@ -23,7 +23,7 @@ jobs:
 
       - name: Push to GHCR
         run: |
-          nix develop --command skopeo copy \
+          nix develop --accept-flake-config --command skopeo copy \
             --dest-creds "${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}" \
             docker-archive:result \
             docker://ghcr.io/neelzee/jweb:latest
