@@ -13,10 +13,26 @@ tags:
   - name: posts
   - name: tags
   - name: uploads
+  - name: system
 
 components:
 
   schemas:
+
+    AppStatus:
+      type: object
+      required: [version, startedAt, uptimeSeconds]
+      properties:
+        version:
+          type: string
+          description: PVP version (e.g. "0.1.0.0")
+          pattern: '^\d+\.\d+\.\d+\.\d+$'
+        startedAt:
+          type: string
+          format: date-time
+        uptimeSeconds:
+          type: integer
+          format: int64
 
     PostStatus:
       type: string
@@ -502,3 +518,16 @@ paths:
                 type: string
         '404':
           description: Not found
+
+  /version:
+    get:
+      operationId: getVersionR
+      tags: [system]
+      summary: App version, start time, and uptime
+      responses:
+        '200':
+          description: Current app status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppStatus'

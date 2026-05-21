@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -fno-warn-unused-binds -fno-warn-unused-imports #-}
 
 module Jweb.Types (
+  AppStatus (..),
   Post (..),
   PostStatus (..),
   Tag (..),
@@ -20,6 +21,32 @@ import qualified Data.Char as Char
 import qualified Data.Text as T
 import qualified Data.Map as Map
 import GHC.Generics (Generic)
+
+
+-- | 
+data AppStatus = AppStatus
+  { appStatusVersion :: Text -- ^ Semantic version (e.g. \"1.2.3\")
+  , appStatusStartedAt :: UTCTime -- ^ 
+  , appStatusUptimeSeconds :: Int64 -- ^ 
+  } deriving (Show, Eq, Generic)
+
+instance FromJSON AppStatus where
+  parseJSON = genericParseJSON optionsAppStatus
+instance ToJSON AppStatus where
+  toJSON = genericToJSON optionsAppStatus
+
+optionsAppStatus :: Options
+optionsAppStatus =
+  defaultOptions
+    { omitNothingFields  = True
+    , fieldLabelModifier = \s -> fromMaybe ("did not find JSON field name for " ++ show s) $ List.lookup s table
+    }
+  where
+    table =
+      [ ("appStatusVersion", "version")
+      , ("appStatusStartedAt", "startedAt")
+      , ("appStatusUptimeSeconds", "uptimeSeconds")
+      ]
 
 
 -- | 

@@ -130,24 +130,30 @@
 
         packages.jweb-js = jweb-js;
 
-        packages.docker = pkgs.dockerTools.buildLayeredImage {
-          name = "jweb";
-          tag = "latest";
+        packages.docker =
+          let
+            envVersion = builtins.getEnv "JWEB_VERSION";
+            version = if envVersion != "" then envVersion else "0.0.0";
+          in
+          pkgs.dockerTools.buildLayeredImage {
+            name = "jweb";
+            tag = "latest";
 
-          contents = [
-            self'.packages.jweb
-            pkgs.cacert
-          ];
-
-          config = {
-            Cmd = [ "${self'.packages.jweb}/bin/jweb" ];
-            ExposedPorts."3000/tcp" = {};
-            WorkingDir = "/data";
-            Env = [
-              "JWEB_STATIC_DIR=${self'.packages.jweb}/share/jweb/static"
+            contents = [
+              self'.packages.jweb
+              pkgs.cacert
             ];
+
+            config = {
+              Cmd = [ "${self'.packages.jweb}/bin/jweb" ];
+              ExposedPorts."3000/tcp" = {};
+              WorkingDir = "/data";
+              Env = [
+                "JWEB_STATIC_DIR=${self'.packages.jweb}/share/jweb/static"
+                "JWEB_VERSION=${version}"
+              ];
+            };
           };
-        };
       };
     };
 }

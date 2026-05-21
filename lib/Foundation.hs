@@ -3,6 +3,7 @@ module Foundation where
 import Data.Int (Int64)
 import Data.Maybe (isJust)
 import Data.Text (Text)
+import Data.Time (UTCTime)
 import Database.Persist.Sqlite (ConnectionPool, SqlBackend, runSqlPool)
 import Model
 import Yesod
@@ -11,7 +12,9 @@ data App = App
   { appConnectionPool :: ConnectionPool,
     appUploadDir :: FilePath,
     appSessionKeyPath :: FilePath,
-    appStaticDir :: FilePath
+    appStaticDir :: FilePath,
+    appStartedAt :: UTCTime,
+    appVersion :: Text
   }
 
 mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")

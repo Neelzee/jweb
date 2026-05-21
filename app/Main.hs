@@ -23,11 +23,13 @@ main = do
   dbPath          <- fromMaybe "/var/lib/jweb/jweb.db"     <$> lookupEnv "JWEB_DB_PATH"
   sessionKeyPath  <- fromMaybe "/var/lib/jweb/session.aes" <$> lookupEnv "JWEB_SESSION_KEY"
   staticDir       <- fromMaybe "./static"                  <$> lookupEnv "JWEB_STATIC_DIR"
+  version         <- pack . fromMaybe "0.0.0"              <$> lookupEnv "JWEB_VERSION"
   port            <- maybe 3000  read <$> lookupEnv "JWEB_PORT"
   cleanupInterval <- maybe 86400 read <$> lookupEnv "JWEB_CLEANUP_INTERVAL_SECS"
+  startedAt <- getCurrentTime
   pool <- runStderrLoggingT $ createSqlitePool (pack dbPath) 5
   runSqlPool (runMigration migrateAll) pool
-  waiApp <- toWaiApp (App pool uploadDir sessionKeyPath staticDir)
+  waiApp <- toWaiApp (App pool uploadDir sessionKeyPath staticDir startedAt version)
   startCleanupThread pool cleanupInterval
   run port waiApp
 
