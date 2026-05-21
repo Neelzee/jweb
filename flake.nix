@@ -35,7 +35,10 @@
         '';
         jweb-js = psPkgs.stdenv.mkDerivation {
           name = "jweb-js";
-          src = ./.;
+          src = lib.cleanSourceWith {
+            filter = path: _type: !(lib.hasPrefix (toString ./test) path);
+            src = ./.;
+          };
           nativeBuildInputs =
           [
             psPkgs.purs
