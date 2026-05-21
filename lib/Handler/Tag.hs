@@ -39,10 +39,20 @@ postTagCreateR = do
         [hamlet|
           <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
             + Ny kategori
-          <div hx-swap-oob="beforeend:#tags-select">
-            <label class="flex items-center gap-2 text-sm cursor-pointer">
-              <input type="checkbox" name="tags" value="#{fromSqlKey tid}" checked>
+          <div hx-swap-oob="beforeend:#tag-list">
+            <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
               #{trimmed}
+              <small>(0 innlegg)
+              <button type="button" class="px-2 py-1 text-sm rounded border cursor-pointer font-[inherit]"
+                hx-get=@{TagEditR tid}
+                hx-target="#tag-#{fromSqlKey tid}"
+                hx-swap="outerHTML">Rediger
+              <button class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-red-600 text-white"
+                hx-post=@{TagDeleteR tid}
+                hx-target="#tag-#{fromSqlKey tid}"
+                hx-swap="delete"
+                hx-confirm="Sletta «#{trimmed}»? Dette fjernar taggen frå alle innlegg.">
+                Slett
         |]
 
 getTagInlineR :: Handler Html
@@ -54,7 +64,7 @@ getTagInlineR = do
       countMap = foldr (\(Entity _ l) m -> Map.insertWith (+) (postTagLinkTagId l) 1 m) Map.empty links
   renderFragment
     [hamlet|
-      <ul class="flex flex-col gap-2 list-none">
+      <ul id="tag-list" class="flex flex-col gap-2 list-none">
         $forall Entity tid tag <- tags
           <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
             #{postTagTag tag}
