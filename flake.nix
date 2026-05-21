@@ -54,7 +54,7 @@
           '';
           installPhase = ''
             mkdir -p $out
-            cp main.js $out/
+            cp static/main.js $out/main.js
           '';
         };
       in
