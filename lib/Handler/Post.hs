@@ -115,7 +115,7 @@ postForm mPost allTags selectedIds mPid =
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="tags" value="#{tagKey}" :isSelected:checked>
             #{tagName}
-      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML" hx-include="#tags-select input[type=checkbox]:checked">
         Rediger kategorier
     <label class="block text-sm font-semibold mb-1.5">Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">

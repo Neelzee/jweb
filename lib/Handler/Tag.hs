@@ -3,10 +3,11 @@ module Handler.Tag where
 import Data.Int (Int64)
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
+import Data.Maybe (mapMaybe)
 import Data.Text (Text)
 import qualified Data.Text as T
-import Database.Persist (delete, deleteWhere, get, getBy, insertUnique, update, (=.), (==.))
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
+import Text.Read (readMaybe)
 import Foundation
 import Model
 import Network.HTTP.Types (ok200)
@@ -17,7 +18,7 @@ getTagNewR = do
   _ <- requireLogin
   renderFragment
     [hamlet|
-      <form class="flex items-center gap-2" hx-post=@{TagR} hx-target="#tag-creator" hx-swap="innerHTML">
+      <form class="flex items-center gap-2" hx-post=@{TagR} hx-target="#tag-creator" hx-swap="innerHTML" hx-include="#selected-tags-holder input">
         <input type="text" name="tag" required placeholder="Ny kategori" class="px-2 py-1 border rounded text-sm font-[inherit]">
         <button type="submit" class="px-2 py-1 text-sm rounded cursor-pointer font-[inherit] bg-green-600 text-white">Opprett
     |]
@@ -35,7 +36,10 @@ postTagR = do
           <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
             + Ny kategori
         |]
-    Just tid ->
+    Just tid -> do
+      existingTexts <- lookupPostParams "tags"
+      let existingIds = mapMaybe (fmap toSqlKey . readMaybe . T.unpack) existingTexts :: [PostTagId]
+          allSelectedIds = existingIds ++ [tid]
       renderFragment
         [hamlet|
           <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
@@ -54,6 +58,9 @@ postTagR = do
                 hx-swap="delete"
                 hx-confirm="Sletta «#{trimmed}»? Dette fjernar taggen frå alle innlegg.">
                 Slett
+          <div hx-swap-oob="innerHTML:#selected-tags-holder">
+            $forall sid <- allSelectedIds
+              <input type="hidden" name="tags" value="#{fromSqlKey sid}">
         |]
 
 getTagsInlineR :: Handler Html
@@ -63,8 +70,13 @@ getTagsInlineR = do
   links <- runDB $ selectList [] []
   let countMap :: Map PostTagId Int
       countMap = foldr (\(Entity _ l) m -> Map.insertWith (+) (postTagLinkTagId l) 1 m) Map.empty links
+  selectedTexts <- lookupGetParams "tags"
+  let selectedIds = mapMaybe (fmap toSqlKey . readMaybe . T.unpack) selectedTexts :: [PostTagId]
   renderFragment
     [hamlet|
+      <div id="selected-tags-holder">
+        $forall sid <- selectedIds
+          <input type="hidden" name="tags" value="#{fromSqlKey sid}">
       <ul id="tag-list" class="flex flex-col gap-2 list-none">
         $forall Entity tid tag <- tags
           <li id="tag-#{fromSqlKey tid}" class="flex items-center gap-3 text-sm">
@@ -83,7 +95,7 @@ getTagsInlineR = do
       <div id="tag-creator" class="flex items-center gap-2 mt-2">
         <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagNewR} hx-target="#tag-creator" hx-swap="innerHTML">
           + Ny kategori
-      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsSelectR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsSelectR} hx-target="#tags-area" hx-swap="innerHTML" hx-include="#selected-tags-holder input">
         Tilbake
     |]
 
@@ -91,15 +103,17 @@ getTagsSelectR :: Handler Html
 getTagsSelectR = do
   _ <- requireLogin
   allTags <- runDB $ selectList [] [Asc PostTagTag]
+  selectedTexts <- lookupGetParams "tags"
+  let selectedIds = mapMaybe (fmap toSqlKey . readMaybe . T.unpack) selectedTexts :: [PostTagId]
   renderFragment
     [hamlet|
       <label class="block text-sm font-semibold mb-1.5">Kategori
       <div id="tags-select" class="flex flex-col gap-1">
         $forall Entity tid tag <- allTags
           <label class="flex items-center gap-2 text-sm cursor-pointer">
-            <input type="checkbox" name="tags" value="#{fromSqlKey tid}">
+            <input type="checkbox" name="tags" value="#{fromSqlKey tid}" :elem tid selectedIds:checked>
             #{postTagTag tag}
-      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML" hx-include="#tags-select input[type=checkbox]:checked">
         Rediger kategorier
     |]
 
