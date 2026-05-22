@@ -36,6 +36,7 @@ jobs:
           JWEB_UPLOAD_DIR=/tmp/jweb-uploads \
           JWEB_STATIC_DIR=./static \
           JWEB_PORT=3000 \
+          JWEB_TEST_MODE=1 \
           ./result/bin/jweb &
           echo $! > /tmp/jweb.pid
 

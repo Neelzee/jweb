@@ -6,6 +6,7 @@
 / JwebHomeR GET
 /auth/login AuthLoginR GET POST
 /auth/logout AuthLogoutR POST
+/auth/test-session AuthTestSessionR GET
 /post/new PostNewR GET POST
 /post/#Int64/edit PostByInt64EditR GET POST
 /post/#Int64/delete PostByInt64DeleteR POST

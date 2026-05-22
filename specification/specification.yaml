@@ -216,6 +216,18 @@ paths:
         '303':
           description: Redirect to home
 
+  /auth/test-session:
+    get:
+      operationId: getAuthTestSessionR
+      tags: [auth]
+      summary: Test-only session bypass (requires JWEB_TEST_MODE env var)
+      x-dev-only: true
+      responses:
+        '303':
+          description: Redirects to home with session set as first user in DB
+        '404':
+          description: Not available outside test mode
+
   /post/new:
     get:
       operationId: getPostNewR

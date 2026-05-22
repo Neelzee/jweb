@@ -2,19 +2,23 @@ module Test.Main where
 
 import Prelude
 import Effect (Effect)
-import Effect.Aff (launchAff_)
+import Effect.Aff (Aff, bracket, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Effect.Exception (error, throwException)
-import Playwright (close, goto, launch, newPage, title)
+import Playwright (close, launch, newPage, setDefaultTimeout)
+import Test.NewTagSelected as NewTagSelected
+import Test.Title as Title
+
+runTest :: String -> Aff Unit -> Aff Unit
+runTest name test = do
+  liftEffect $ log ("▶ " <> name)
+  test
+  liftEffect $ log ("✓ " <> name)
 
 main :: Effect Unit
-main = launchAff_ do
-  browser <- launch
-  page <- newPage browser
-  goto page "http://localhost:3000"
-  t <- title page
-  liftEffect $ if t == "Ønskeliste"
-    then log "✓ title is 'Ønskeliste'"
-    else throwException $ error $ "Expected 'Ønskeliste', got: " <> t
-  close browser
+main = launchAff_ $
+  bracket launch close \browser -> do
+    page <- newPage browser
+    liftEffect $ setDefaultTimeout page 10000
+    runTest "title" (Title.run page)
+    runTest "new tag is selected after creation" (NewTagSelected.run page)
