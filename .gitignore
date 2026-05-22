@@ -1,6 +1,8 @@
 .direnv
 jweb.db
 jweb.db-*
+jweb-test.db
+jweb-test.db-*
 *.swp
 dist-newstyle
 upload

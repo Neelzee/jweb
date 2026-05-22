@@ -148,11 +148,11 @@ getAuthTestSessionR = do
     Nothing -> notFound
     Just _ -> do
       mUser <- runDB $ selectFirst ([] :: [Filter User]) []
-      case mUser of
-        Nothing -> notFound
-        Just (Entity uid _) -> do
-          setSession "userId" (toPathPiece uid)
-          redirect JwebHomeR
+      uid <- case mUser of
+        Just (Entity uid _) -> pure uid
+        Nothing -> runDB $ insert (User "test@example.com" "Test User" Nothing)
+      setSession "userId" (toPathPiece uid)
+      redirect JwebHomeR
 
 -- Helpers
 

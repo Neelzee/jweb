@@ -14,7 +14,16 @@ hs:
 ts:
   npx tsc
 
+test-db := "jweb-test.db"
+
 test: ts
+  rm -f {{test-db}} {{test-db}}-*
   spago test
+
+serve-test:
+  #!/usr/bin/env bash
+  export JWEB_DB_PATH={{test-db}}
+  export JWEB_TEST_MODE=1
+  cabal run jweb
 
 all: css js hs
