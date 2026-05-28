@@ -70,6 +70,7 @@ getJwebHomeR = do
             <a href=@?{(JwebHomeR, orderedParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Bestilt
             <a href=@?{(JwebHomeR, boughtParams)} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Kjøpt
             $if loggedIn
+              <a href=@{DateR} class="px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Date
               <a href=@{TrashR} class="filter-trash hidden sm:inline-flex ml-auto px-3.5 py-1 rounded-full text-sm font-medium border transition-colors whitespace-nowrap no-underline">Papirkurv
           $if loggedIn
             <a href=@{PostNewR} class="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-semibold mb-6 shadow-sm transition no-underline">+ Nytt ønske

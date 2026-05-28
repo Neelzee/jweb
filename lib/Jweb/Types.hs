@@ -5,6 +5,8 @@
 
 module Jweb.Types (
   AppStatus (..),
+  DateIdea (..),
+  DateStatus (..),
   Post (..),
   PostStatus (..),
   Tag (..),
@@ -46,6 +48,62 @@ optionsAppStatus =
       [ ("appStatusVersion", "version")
       , ("appStatusStartedAt", "startedAt")
       , ("appStatusUptimeSeconds", "uptimeSeconds")
+      ]
+
+
+-- | 
+data DateIdea = DateIdea
+  { dateIdeaId :: Int64 -- ^ 
+  , dateIdeaTitle :: Text -- ^ 
+  , dateIdeaDescription :: Text -- ^ 
+  , dateIdeaStatus :: DateStatus -- ^ 
+  , dateIdeaLocation :: Maybe Text -- ^ 
+  , dateIdeaCreatedAt :: UTCTime -- ^ 
+  , dateIdeaCreatedBy :: Int64 -- ^ 
+  } deriving (Show, Eq, Generic)
+
+instance FromJSON DateIdea where
+  parseJSON = genericParseJSON optionsDateIdea
+instance ToJSON DateIdea where
+  toJSON = genericToJSON optionsDateIdea
+
+optionsDateIdea :: Options
+optionsDateIdea =
+  defaultOptions
+    { omitNothingFields  = True
+    , fieldLabelModifier = \s -> fromMaybe ("did not find JSON field name for " ++ show s) $ List.lookup s table
+    }
+  where
+    table =
+      [ ("dateIdeaId", "id")
+      , ("dateIdeaTitle", "title")
+      , ("dateIdeaDescription", "description")
+      , ("dateIdeaStatus", "status")
+      , ("dateIdeaLocation", "location")
+      , ("dateIdeaCreatedAt", "createdAt")
+      , ("dateIdeaCreatedBy", "createdBy")
+      ]
+
+
+-- | 
+data DateStatus = DateStatus
+  { 
+  } deriving (Show, Eq, Generic)
+
+instance FromJSON DateStatus where
+  parseJSON = genericParseJSON optionsDateStatus
+instance ToJSON DateStatus where
+  toJSON = genericToJSON optionsDateStatus
+
+optionsDateStatus :: Options
+optionsDateStatus =
+  defaultOptions
+    { omitNothingFields  = True
+    , fieldLabelModifier = \s -> fromMaybe ("did not find JSON field name for " ++ show s) $ List.lookup s table
+    }
+  where
+    table =
+      [ 
       ]
 
 

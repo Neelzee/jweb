@@ -4,6 +4,7 @@ module Application where
 
 import Foundation
 import Handler.Auth
+import Handler.Date
 import Handler.Docs
 import Handler.Home
 import Handler.Post

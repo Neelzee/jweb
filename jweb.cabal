@@ -34,6 +34,8 @@ library
     , Application
     , Model
     , Whitelist
+    , Handler.Date
+    , Template.Date
     , Handler.Docs
     , Handler.Home
     , Handler.Auth
