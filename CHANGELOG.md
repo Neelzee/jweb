@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/Neelzee/jweb/compare/v1.0.1...v1.1.0) (2026-05-29)
+
+
+### Features
+
+* **api:** added endpoint for post export ([b82ac19](https://github.com/Neelzee/jweb/commit/b82ac1973467f91aae15339e5caa0bcb12e24df3))
+* **Date:** add date planner with itinerary ([74c316f](https://github.com/Neelzee/jweb/commit/74c316f715d9efc479e6cb897d1298295426eef0))
+
+
+### Bug Fixes
+
+* **Tags:** Newly created tags are selected ([2d69746](https://github.com/Neelzee/jweb/commit/2d6974659128be67433aa5d8f4d2aa6e92ba3bba))
+
 ## [1.0.1](https://github.com/Neelzee/jweb/compare/v1.0.0...v1.0.1) (2026-05-21)
 
 

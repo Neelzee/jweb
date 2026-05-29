@@ -1,6 +1,6 @@
 cabal-version:      2.4
 name:               jweb
-version:            1.0.1
+version:            1.1.0
 build-type:         Simple
 extra-source-files: config/routes.yesodroutes
 
