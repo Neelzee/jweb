@@ -54,6 +54,7 @@ library
     , persistent-sqlite >= 2.13
     , persistent-template
     , shakespeare       >= 2.0
+    , aeson
     , bcrypt
     , bytestring
     , containers

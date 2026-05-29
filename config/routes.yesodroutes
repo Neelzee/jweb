@@ -24,6 +24,7 @@
 /tag/#Int64/row TagByInt64RowR GET
 /docs DocsR GET
 /version VersionR GET
+/api/posts ApiPostsR GET
 /date DateR GET
 /date/new/itinerary/item DateNewItineraryItemR POST
 /date/new/itinerary/item/#Int DateNewItineraryItemByIntR POST

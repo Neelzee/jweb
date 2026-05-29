@@ -629,6 +629,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/AppStatus'
 
+  /api/posts:
+    get:
+      operationId: getApiPostsR
+      tags: [posts]
+      summary: List all active posts (auth required)
+      responses:
+        '200':
+          description: Array of posts with tags and image URLs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '303':
+          description: Redirect to login if not authenticated
+
 
   /date:
     get:

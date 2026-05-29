@@ -93,6 +93,32 @@ postPostByInt64DeleteR rawId = do
   addHeader "HX-Redirect" "/"
   sendResponseStatus ok200 ("" :: Text)
 
+getApiPostsR :: Handler Value
+getApiPostsR = do
+  _ <- requireLogin
+  posts <- runDB $ selectList [PostDeletedAt ==. Nothing] [Desc PostCreatedAt]
+  postsJson <- mapM toPostJson posts
+  returnJson postsJson
+
+toPostJson :: Entity Post -> Handler Value
+toPostJson (Entity pid post) = do
+  tagLinks <- runDB $ selectList [PostTagLinkPostId ==. pid] []
+  tags <- runDB $ mapM (Database.Persist.get . postTagLinkTagId . entityVal) tagLinks
+  images <- runDB $ selectList [PostImagePostId ==. pid] [Asc PostImageSortOrder]
+  let tagNames = [postTagTag t | Just t <- tags]
+      imageUrls = map (postImageFilePath . entityVal) images
+  return $ object
+    [ "id" .= fromSqlKey pid
+    , "name" .= postName post
+    , "description" .= postDescription post
+    , "status" .= statusVal (postStatus post)
+    , "tags" .= tagNames
+    , "imageUrls" .= imageUrls
+    , "link" .= postLink post
+    , "videoUrl" .= postVideoUrl post
+    , "createdAt" .= postCreatedAt post
+    ]
+
 getUploadsByTextR :: Text -> Handler TypedContent
 getUploadsByTextR filename = do
   when (T.any (== '/') filename || T.isInfixOf ".." filename) notFound
