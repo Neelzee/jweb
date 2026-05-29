@@ -93,6 +93,32 @@ postPostByInt64DeleteR rawId = do
   addHeader "HX-Redirect" "/"
   sendResponseStatus ok200 ("" :: Text)
 
+getApiPostsR :: Handler Value
+getApiPostsR = do
+  _ <- requireLogin
+  posts <- runDB $ selectList [PostDeletedAt ==. Nothing] [Desc PostCreatedAt]
+  postsJson <- mapM toPostJson posts
+  returnJson postsJson
+
+toPostJson :: Entity Post -> Handler Value
+toPostJson (Entity pid post) = do
+  tagLinks <- runDB $ selectList [PostTagLinkPostId ==. pid] []
+  tags <- runDB $ mapM (Database.Persist.get . postTagLinkTagId . entityVal) tagLinks
+  images <- runDB $ selectList [PostImagePostId ==. pid] [Asc PostImageSortOrder]
+  let tagNames = [postTagTag t | Just t <- tags]
+      imageUrls = map (postImageFilePath . entityVal) images
+  return $ object
+    [ "id" .= fromSqlKey pid
+    , "name" .= postName post
+    , "description" .= postDescription post
+    , "status" .= statusVal (postStatus post)
+    , "tags" .= tagNames
+    , "imageUrls" .= imageUrls
+    , "link" .= postLink post
+    , "videoUrl" .= postVideoUrl post
+    , "createdAt" .= postCreatedAt post
+    ]
+
 getUploadsByTextR :: Text -> Handler TypedContent
 getUploadsByTextR filename = do
   when (T.any (== '/') filename || T.isInfixOf ".." filename) notFound
@@ -115,7 +141,7 @@ postForm mPost allTags selectedIds mPid =
           <label class="flex items-center gap-2 text-sm cursor-pointer">
             <input type="checkbox" name="tags" value="#{tagKey}" :isSelected:checked>
             #{tagName}
-      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML">
+      <button type="button" class="text-sm font-medium font-[inherit] bg-transparent border-0 p-0 cursor-pointer" hx-get=@{TagsInlineR} hx-target="#tags-area" hx-swap="innerHTML" hx-include="#tags-select input[type=checkbox]:checked">
         Rediger kategorier
     <label class="block text-sm font-semibold mb-1.5">Namn
     <input type="text" name="name" value="#{maybe "" postName mPost}" required class="w-full px-3.5 py-2.5 border rounded-lg text-base font-[inherit] transition">

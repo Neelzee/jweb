@@ -6,6 +6,7 @@
 / JwebHomeR GET
 /auth/login AuthLoginR GET POST
 /auth/logout AuthLogoutR POST
+/auth/test-session AuthTestSessionR GET
 /post/new PostNewR GET POST
 /post/#Int64/edit PostByInt64EditR GET POST
 /post/#Int64/delete PostByInt64DeleteR POST
@@ -23,3 +24,13 @@
 /tag/#Int64/row TagByInt64RowR GET
 /docs DocsR GET
 /version VersionR GET
+/api/posts ApiPostsR GET
+/date DateR GET
+/date/new/itinerary/item DateNewItineraryItemR POST
+/date/new/itinerary/item/#Int DateNewItineraryItemByIntR POST
+/date/new DateNewR GET POST
+!/date/#Int64 DateByInt64R GET
+/date/#Int64/edit DateByInt64EditR GET POST
+/date/#Int64/delete DateByInt64DeleteR POST
+!/date/#Int64/itinerary/item DateByInt64ItineraryItemR POST
+/date/#Int64/itinerary/item/#Int64/delete DateByInt64ItineraryItemByInt64DeleteR POST

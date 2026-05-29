@@ -12,6 +12,11 @@ data PostStatus = Wanted | Ordered | Bought
 
 derivePersistField "PostStatus"
 
+data DateStatus = Idea | Planned | Done
+  deriving (Show, Read, Eq, Ord, Enum, Bounded, Typeable)
+
+derivePersistField "DateStatus"
+
 share
   [mkPersist sqlSettings, mkMigrate "migrateAll"]
   [persistLowerCase|
@@ -33,6 +38,15 @@ Post
   deletedAt    UTCTime Maybe
   deriving Show
 
+DateIdea
+  createdAt    UTCTime
+  status       DateStatus
+  title        Text
+  description  Text
+  location     Text Maybe
+  createdBy    UserId
+  deriving Show
+
 PostImage
   postId       PostId
   filePath     Text
@@ -46,4 +60,28 @@ PostTag
 PostTagLink
   tagId        PostTagId
   postId       PostId
+
+DateImage
+  dateId       DateIdeaId
+  filePath     Text
+  sortOrder    Int
+  deriving Show
+
+DateTagLink
+  tagId        PostTagId
+  dateId       DateIdeaId
+
+Itinerary
+  dateId       DateIdeaId
+  deriving Show
+
+ItineraryItem
+  itineraryId  ItineraryId
+  name         Text
+  description  Text Maybe
+  location     Text Maybe
+  start        UTCTime
+  end          UTCTime
+  deriving Show
+
 |]

@@ -34,6 +34,8 @@ library
     , Application
     , Model
     , Whitelist
+    , Handler.Date
+    , Template.Date
     , Handler.Docs
     , Handler.Home
     , Handler.Auth
@@ -52,6 +54,7 @@ library
     , persistent-sqlite >= 2.13
     , persistent-template
     , shakespeare       >= 2.0
+    , aeson
     , bcrypt
     , bytestring
     , containers

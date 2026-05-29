@@ -1,6 +1,7 @@
 module Handler.Auth where
 
 import Control.Monad (unless, when)
+import System.Environment (lookupEnv)
 import qualified Crypto.BCrypt as BCrypt
 import Data.Maybe (isJust)
 import Data.Text (Text)
@@ -139,6 +140,19 @@ postAuthLogoutR :: Handler ()
 postAuthLogoutR = do
   deleteSession "userId"
   redirect JwebHomeR
+
+getAuthTestSessionR :: Handler Html
+getAuthTestSessionR = do
+  mTestMode <- liftIO $ lookupEnv "JWEB_TEST_MODE"
+  case mTestMode of
+    Nothing -> notFound
+    Just _ -> do
+      mUser <- runDB $ selectFirst ([] :: [Filter User]) []
+      uid <- case mUser of
+        Just (Entity uid _) -> pure uid
+        Nothing -> runDB $ insert (User "test@example.com" "Test User" Nothing)
+      setSession "userId" (toPathPiece uid)
+      redirect JwebHomeR
 
 -- Helpers
 
